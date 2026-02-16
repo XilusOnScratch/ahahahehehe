@@ -3,17 +3,6 @@ require('dotenv').config();
 
 const express = require('express');
 
-// Load TensorFlow.js Node backend - MUST be imported before other TensorFlow libraries
-// This ensures the native C++ bindings are used for performance
-try {
-  require('@tensorflow/tfjs-node');
-  console.log('✅ TensorFlow.js Node backend loaded successfully');
-} catch (error) {
-  console.warn('⚠️ Failed to load @tensorflow/tfjs-node:', error.message);
-  console.warn('Falling back to pure JavaScript backend (slower).');
-  console.warn('To fix: ensure @tensorflow/tfjs-node is installed and Visual Studio Build Tools are available.');
-}
-
 // Log memory usage
 const used = process.memoryUsage();
 console.log('Initial Memory Usage:');
