@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { isAuthenticated } from '../../lib/storage';
+import { isAuthenticated, setPinAuthenticated } from '../../lib/storage';
 
 function PinPage() {
   const navigate = useNavigate();
@@ -18,8 +18,14 @@ function PinPage() {
     e.preventDefault();
 
     if (pin === '326') {
-      setError('');
-      navigate('/camera');
+      try {
+        setPinAuthenticated(true);
+        setError('');
+        navigate('/camera');
+      } catch (err) {
+        console.error('Error setting auth:', err);
+        setError('Storage error');
+      }
     } else {
       setError('Invalid code');
       setPin('');

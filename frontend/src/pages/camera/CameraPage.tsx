@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { setAuthenticated, isAuthenticated } from '../../lib/storage';
+import { setAuthenticated, isAuthenticated, isPinAuthenticated } from '../../lib/storage';
 
 function Camera() {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ function Camera() {
   const [cameraActive, setCameraActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [photoData, setPhotoData] = useState<string | null>(null);
-  
+
   // New states for backend interaction
   const [isProcessing, setIsProcessing] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState(null);
@@ -73,7 +73,7 @@ function Camera() {
       ctx.scale(-1, 1);
       ctx.drawImage(videoRef.current as HTMLVideoElement, 0, 0, width, height);
       setHasPhoto(true);
-      
+
       // Store the photo data as a base64 string
       const photoDataUrl = (canvasRef.current as HTMLCanvasElement).toDataURL('image/jpeg');
       setPhotoData(photoDataUrl);
@@ -92,7 +92,7 @@ function Camera() {
 
   const processPhoto = () => {
     if (!canvasRef.current || !photoData) return;
-    
+
     setIsProcessing(true);
     setErrorMessage('');
 
@@ -102,53 +102,53 @@ function Camera() {
         setErrorMessage('Failed to process photo');
         return;
       }
-      
+
       // Create form data to send to backend
       const formData = new FormData();
       formData.append('image', blob, 'photo.jpg');
-      
+
       // Send the photo to the backend for face matching
       fetch('https://aha-backend-ph63.onrender.com/api/face/match', {
         method: 'POST',
         body: formData,
       })
-      .then(async response => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          const msg = data?.message || data?.error || 'Server error: ' + response.status;
-          throw new Error(msg);
-        }
-        return data;
-      })
-      .then(data => {
-        setIsProcessing(false);
-        
-        if (data.success && data.profile) {
-          // Check if the matched person is naman - TESTING!! Should actually be ahana
-          const matchedName = data.profile.name.toLowerCase();
-          if (matchedName.includes('naman')) {
-            // Store the matched profile
-            setMatchedProfile(data.profile);
-            
-            // Save authentication status to localStorage
-            setAuthenticated(true);
-            
-            // Navigate to dashboard after successful face unlock
-            navigate('/dash');
-          } else {
-            // Not naman, show error - SHOULD BE ahana
-            setErrorMessage('Access denied. Only Naman is authorized.');
+        .then(async response => {
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const msg = data?.message || data?.error || 'Server error: ' + response.status;
+            throw new Error(msg);
           }
-        } else {
-          // No match found, show error
-          setErrorMessage('Face not recognized. Please try again.');
-        }
-      })
-      .catch(error => {
-        console.error('Error connecting to backend:', error);
-        setIsProcessing(false);
-        setErrorMessage(error?.message || 'Face not found. Please try again.');
-      });
+          return data;
+        })
+        .then(data => {
+          setIsProcessing(false);
+
+          if (data.success && data.profile) {
+            // Check if the matched person is naman - TESTING!! Should actually be ahana
+            const matchedName = data.profile.name.toLowerCase();
+            if (matchedName.includes('naman')) {
+              // Store the matched profile
+              setMatchedProfile(data.profile);
+
+              // Save authentication status to localStorage
+              setAuthenticated(true);
+
+              // Navigate to dashboard after successful face unlock
+              navigate('/dash');
+            } else {
+              // Not naman, show error - SHOULD BE ahana
+              setErrorMessage('Access denied. Only Naman is authorized.');
+            }
+          } else {
+            // No match found, show error
+            setErrorMessage('Face not recognized. Please try again.');
+          }
+        })
+        .catch(error => {
+          console.error('Error connecting to backend:', error);
+          setIsProcessing(false);
+          setErrorMessage(error?.message || 'Face not found. Please try again.');
+        });
     }, 'image/jpeg', 0.8);
   };
 
@@ -158,6 +158,13 @@ function Camera() {
       navigate('/dash');
       return;
     }
+
+    // Check if pin authenticated
+    if (!isPinAuthenticated()) {
+      navigate('/');
+      return;
+    }
+
     startCamera();
     return () => {
       stopCamera();
@@ -180,34 +187,34 @@ function Camera() {
       <div className="absolute inset-0 bg-gradient-to-b from-pink-200/50 via-purple-200/40 to-pink-200/50" />
 
       {/* Content */}
-      <motion.div 
+      <motion.div
         className="relative h-full flex flex-col items-center justify-center px-6 py-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="absolute top-8 left-0 right-0 flex justify-between items-center px-6 z-10"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <motion.button 
-            onClick={() => navigate('/')} 
+          <motion.button
+            onClick={() => navigate('/')}
             className="text-white hover:text-pink-200 transition-colors backdrop-blur-sm bg-white/10 px-4 py-2 rounded-lg"
             whileHover={{ x: -3 }}
             whileTap={{ scale: 0.95 }}
           >
             ← back
           </motion.button>
-          <motion.h1 
+          <motion.h1
             className="text-2xl text-white font-bold"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            face unlock
+            face id
           </motion.h1>
           <div className="w-16" />
         </motion.div>
@@ -215,7 +222,7 @@ function Camera() {
         {/* Error Message */}
         <AnimatePresence>
           {errorMessage && (
-            <motion.div 
+            <motion.div
               className="absolute top-24 w-full max-w-md bg-red-500/90 backdrop-blur-sm border-2 border-red-300 text-white px-6 py-3 rounded-xl z-10"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -228,14 +235,14 @@ function Camera() {
         </AnimatePresence>
 
         {/* Main camera preview - horizontal rectangle */}
-        <motion.div 
+        <motion.div
           className="flex flex-col items-center gap-8"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           {/* Camera container */}
-          <motion.div 
+          <motion.div
             className="relative w-full max-w-2xl aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/30"
             initial={{ y: 20 }}
             animate={{ y: 0 }}
@@ -255,11 +262,11 @@ function Camera() {
               animate={{ opacity: hasPhoto ? 1 : 0 }}
               transition={{ duration: 0.3 }}
             ></motion.canvas>
-            
+
             {/* Processing Overlay */}
             <AnimatePresence>
               {isProcessing && (
-                <motion.div 
+                <motion.div
                   className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -267,7 +274,7 @@ function Camera() {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="text-white text-center">
-                    <motion.div 
+                    <motion.div
                       className="mb-4 w-12 h-12 border-4 border-t-transparent border-white rounded-full mx-auto"
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -280,51 +287,29 @@ function Camera() {
           </motion.div>
 
           {/* Controls */}
-          <motion.div 
+          <motion.div
             className="flex flex-col items-center gap-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.7 }}
           >
-            {/* Capture button */}
+            {/* Capture/Unlock button */}
             <motion.button
-              onClick={hasPhoto ? clearPhoto : takePhoto}
-              disabled={!cameraActive && !hasPhoto || isProcessing}
-              className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all backdrop-blur-sm ${
-                (cameraActive || hasPhoto) && !isProcessing 
-                  ? 'bg-white/20 hover:bg-white/30 text-white border-2 border-white/50' 
-                  : 'opacity-30 cursor-not-allowed'
-              }`}
+              onClick={hasPhoto ? processPhoto : takePhoto}
+              disabled={(!cameraActive && !hasPhoto) || isProcessing}
+              className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all backdrop-blur-sm ${(cameraActive || hasPhoto) && !isProcessing
+                ? 'bg-white/20 hover:bg-white/30 text-white border-2 border-white/50'
+                : 'opacity-30 cursor-not-allowed'
+                }`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              {hasPhoto ? '✓' : '○'}
-            </motion.button>
-
-            {/* Unlock Button */}
-            <AnimatePresence>
-              {hasPhoto && !isProcessing && (
-                <motion.button
-                  onClick={processPhoto}
-                  disabled={isProcessing}
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full px-10 py-4 flex items-center justify-center gap-3 text-lg font-semibold shadow-2xl hover:shadow-pink-500/50 transition-all"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <motion.span
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  >
-                    🔓
-                  </motion.span>
-                  <span>unlock</span>
-                </motion.button>
+              {hasPhoto ? (
+                <img src="/unlock.png" alt="unlock" className="w-8 h-8 object-contain" />
+              ) : (
+                '○'
               )}
-            </AnimatePresence>
+            </motion.button>
           </motion.div>
         </motion.div>
       </motion.div>

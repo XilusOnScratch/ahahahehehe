@@ -10,6 +10,7 @@ import ButtonPage from './pages/stage2/ButtonPage';
 import Stage3Page from './pages/stage3/Stage3Page';
 import Stage4Page from './pages/stage4/Stage4Page';
 import TroubleshootPage from './pages/troubleshoot/TroubleshootPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
   const { pathname } = useLocation();
@@ -31,12 +32,12 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<PinPage />} />
       <Route path="/camera" element={<Camera />} />
-      <Route path="/dash" element={<DashPage />} />
-      <Route path="/stage1" element={<WordHuntPage />} />
-      <Route path="/stage2" element={<ButtonPage />} />
-      <Route path="/stage3" element={<Stage3Page />} />
-      <Route path="/stage4" element={<Stage4Page />} />
-      <Route path="/troubleshoot" element={<TroubleshootPage />} />
+      <Route path="/dash" element={<ProtectedRoute><DashPage /></ProtectedRoute>} />
+      <Route path="/stage1" element={<ProtectedRoute><WordHuntPage /></ProtectedRoute>} />
+      <Route path="/stage2" element={<ProtectedRoute><ButtonPage /></ProtectedRoute>} />
+      <Route path="/stage3" element={<ProtectedRoute><Stage3Page /></ProtectedRoute>} />
+      <Route path="/stage4" element={<ProtectedRoute><Stage4Page /></ProtectedRoute>} />
+      <Route path="/troubleshoot" element={<ProtectedRoute><TroubleshootPage /></ProtectedRoute>} />
     </Routes>
   );
 }

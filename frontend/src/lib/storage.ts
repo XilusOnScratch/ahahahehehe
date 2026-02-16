@@ -6,7 +6,8 @@ const STORAGE_KEYS = {
   CURRENT_STAGE: 'currentStage',
   WORDHUNT_SCORE: 'wordhuntScore',
   STAGE2_PROGRESS: 'stage2Progress',
-  STAGE3_PROGRESS: 'stage3Progress'
+  STAGE3_PROGRESS: 'stage3Progress',
+  PIN_AUTHENTICATED: 'pinAuthenticated'
 };
 
 export interface GameProgress {
@@ -35,6 +36,16 @@ export const setAuthenticated = (value: boolean) => {
 // Check if authenticated
 export const isAuthenticated = (): boolean => {
   return localStorage.getItem(STORAGE_KEYS.AUTHENTICATED) === 'true';
+};
+
+// Check if pin is authenticated
+export const isPinAuthenticated = (): boolean => {
+  return localStorage.getItem(STORAGE_KEYS.PIN_AUTHENTICATED) === 'true';
+};
+
+// Set pin authentication
+export const setPinAuthenticated = (value: boolean) => {
+  localStorage.setItem(STORAGE_KEYS.PIN_AUTHENTICATED, value.toString());
 };
 
 // Mark a stage as completed
@@ -66,6 +77,7 @@ export const getWordHuntScore = (): number => {
 // Reset all progress (for testing or logout)
 export const resetProgress = () => {
   localStorage.removeItem(STORAGE_KEYS.AUTHENTICATED);
+  localStorage.removeItem(STORAGE_KEYS.PIN_AUTHENTICATED);
   localStorage.removeItem(STORAGE_KEYS.COMPLETED_STAGES);
   localStorage.removeItem(STORAGE_KEYS.CURRENT_STAGE);
   localStorage.removeItem(STORAGE_KEYS.WORDHUNT_SCORE);
