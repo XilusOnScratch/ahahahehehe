@@ -36,7 +36,7 @@ function AppRoutes() {
       <Route path="/stage1" element={<ProtectedRoute><WordHuntPage /></ProtectedRoute>} />
       <Route path="/stage2" element={<ProtectedRoute requireStageCompleted={STAGES.WORDHUNT}><ButtonPage /></ProtectedRoute>} />
       <Route path="/stage3" element={<ProtectedRoute requireStageCompleted={STAGES.STAGE2}><Stage3Page /></ProtectedRoute>} />
-      <Route path="/stage4" element={<ProtectedRoute requireStageCompleted={STAGES.STAGE3}><Stage4Page /></ProtectedRoute>} />
+      <Route path="/stage4" element={<ProtectedRoute><Stage4Page /></ProtectedRoute>} />
       <Route path="/troubleshoot" element={<ProtectedRoute><TroubleshootPage /></ProtectedRoute>} />
     </Routes>
   );

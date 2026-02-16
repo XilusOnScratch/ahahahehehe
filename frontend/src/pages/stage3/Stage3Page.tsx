@@ -470,8 +470,6 @@ function Stage3Page() {
     // Get base64 image data
     const base64Image = canvas.toDataURL('image/jpeg', 0.8);
 
-    console.log(`Sending capture, size: ${(base64Image.length / 1024 / 1024).toFixed(2)}MB`);
-
     try {
       const response = await fetch('https://aha-backend-ph63.onrender.com/api/ai/analyze-image', {
         method: 'POST',
