@@ -2,6 +2,13 @@
 require('dotenv').config();
 
 const express = require('express');
+
+// Log memory usage
+const used = process.memoryUsage();
+console.log('Initial Memory Usage:');
+for (let key in used) {
+  console.log(`${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+}
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
@@ -75,8 +82,16 @@ async function startServer() {
 
     // Basic route for testing
     app.get('/', (req, res) => {
+      const used = process.memoryUsage();
+      const memoryUsage = {};
+      for (let key in used) {
+        memoryUsage[key] = `${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`;
+      }
+      console.log('Current Memory Usage:', memoryUsage);
+
       res.json({
         status: 'running',
+        memory: memoryUsage,
         features: {
           faceRecognition: modelsExist,
           aiAnalysis: !!process.env.GEMINI_API_KEY,
