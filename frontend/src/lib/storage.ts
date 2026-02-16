@@ -90,6 +90,7 @@ export const STAGES = {
   WORDHUNT: 'wordhunt',
   STAGE2: 'stage2',
   STAGE3: 'stage3',
+  STAGE4: 'stage4',
 } as const;
 
 // Get the first incomplete stage

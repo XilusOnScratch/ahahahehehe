@@ -1,13 +1,17 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated, isPinAuthenticated } from '../lib/storage';
+import { isAuthenticated, isPinAuthenticated, isStageCompleted } from '../lib/storage';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
+    requireStageCompleted?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireStageCompleted }) => {
     if (isAuthenticated()) {
+        if (requireStageCompleted && !isStageCompleted(requireStageCompleted)) {
+            return <Navigate to="/dash" replace />;
+        }
         return <>{children}</>;
     }
 

@@ -393,7 +393,7 @@ function Stage3Page() {
 
   const [activeClosetDialogue, setActiveClosetDialogue] = useState<string[]>(CLOSET_DIALOGUE);
   const [showLetterPopup, setShowLetterPopup] = useState(false);
-  const LETTER_CONTENT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+  const LETTER_CONTENT = (import.meta.env.VITE_LETTER_CONTENT || "").replace(/\\n/g, '\n');
 
   // Audio Refs
   const jukeboxAudioRef = useRef<HTMLAudioElement | null>(null);
