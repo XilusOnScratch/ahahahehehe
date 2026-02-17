@@ -1599,7 +1599,7 @@ function Stage3Page() {
                       initial={{ opacity: 0.8, y: 0, x: 0 }}
                       animate={{
                         opacity: 0,
-                        y: -40 - Math.random() * 20,
+                        y: 40 + Math.random() * 20,
                         x: note.offset,
                         rotate: note.offset > 0 ? 15 : -15
                       }}
