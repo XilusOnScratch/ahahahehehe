@@ -2133,7 +2133,7 @@ function Stage3Page() {
           {showLetterPopup && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 transition-none" onClick={() => setShowLetterPopup(false)}>
               <div
-                className="bg-[#F5EEE6] border-2 border-[#A69076] p-8 max-w-lg shadow-2xl relative transition-none"
+                className="bg-[#F5EEE6] border-2 border-[#A69076] p-8 max-w-lg shadow-2xl relative transition-none max-h-[85vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
                 style={{
                   minHeight: '400px',
@@ -2141,7 +2141,7 @@ function Stage3Page() {
                   lineHeight: '25px'
                 }}
               >
-                <div className="font-mono text-[#5a4a3a] text-sm md:text-base whitespace-pre-wrap">
+                <div className="font-mono text-[#5a4a3a] text-xs md:text-sm whitespace-pre-wrap">
                   {LETTER_CONTENT}
                 </div>
                 {!inventory.some(i => i.type === 'letter') && (
