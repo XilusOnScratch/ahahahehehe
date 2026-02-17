@@ -16,7 +16,7 @@ function ButtonPage() {
 
   // ==================== STAGE 2 STATE ====================
   const texts = useRef<string[]>([
-    'welcome to stage 2', 'ur goal is to click the button EXACTLY 100 times', 'yay gjgj u did it!', 'yay gjgj u did it!', 'yay gjgj u did it!', 'yay gjgj u did it!', 'yay gjgj u did it!', 'u can go now', 'why are u still clicking me', 'stop clicking me', 'shoo',
+    'welcome back', 'ur goal is to click the button EXACTLY 100 times', 'yay gjgj u did it!', 'yay gjgj u did it!', 'yay gjgj u did it!', 'yay gjgj u did it!', 'yay gjgj u did it!', 'u can go now', 'why are u still clicking me', 'stop clicking me', 'shoo',
     'meanie', 'im being bullied :(', '.', '.', 'stop', 'why are u still here', 'okay bye', 'okay bye',
     'okay bye', 'okay bye', 'okay bye', 'okay bye', 'okay bye', ':(((',
     '.', 'why', '.', 'okay fine jk u arent done yet hehe', 'alr im making it harder', 'hehe', 'hehehe', 'hehehehe', 'wow ok', ' ', ':(', 'HEHE', 'ok fine ill stop', 'JKK HAHAHAHAHA', 'ok fine', 'look behind u', 'hehe made u look',

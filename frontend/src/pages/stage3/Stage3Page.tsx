@@ -395,25 +395,53 @@ function Stage3Page() {
   const [showLetterPopup, setShowLetterPopup] = useState(false);
   const LETTER_CONTENT = (import.meta.env.VITE_LETTER_CONTENT || "").replace(/\\n/g, '\n');
 
+  const [isJukeboxPlaying, setIsJukeboxPlaying] = useState(false);
+  const [jukeboxNotes, setJukeboxNotes] = useState<{ id: number; offset: number }[]>([]);
+
   // Audio Refs
   const jukeboxAudioRef = useRef<HTMLAudioElement | null>(null);
-  const bookRef = useRef<any>(null);
 
   const playJukebox = () => {
     if (!jukeboxAudioRef.current) {
       jukeboxAudioRef.current = new Audio('/opalite.mp3');
       jukeboxAudioRef.current.loop = false;
+      // Also stop when audio ends
+      jukeboxAudioRef.current.onended = () => setIsJukeboxPlaying(false);
     }
 
     if (jukeboxAudioRef.current.paused) {
       jukeboxAudioRef.current.play().catch(e => console.error("Audio playback failed", e));
       setFullText("the jupbox is playing.");
+      setIsJukeboxPlaying(true);
     } else {
       jukeboxAudioRef.current.pause();
       setFullText("the jupbox paused.");
+      setIsJukeboxPlaying(false);
     }
     setTextIndex(0);
   };
+
+  // Music notes effect
+  useEffect(() => {
+    if (!isJukeboxPlaying) {
+      setJukeboxNotes([]);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const noteId = Date.now();
+      setJukeboxNotes(prev => [...prev, { id: noteId, offset: (Math.random() - 0.5) * 20 }]);
+
+      // Auto-remove note after 2 seconds
+      setTimeout(() => {
+        setJukeboxNotes(prev => prev.filter(n => n.id !== noteId));
+      }, 2000);
+    }, 800);
+
+    return () => clearInterval(interval);
+  }, [isJukeboxPlaying]);
+
+  const bookRef = useRef<any>(null);
 
   // Shelf State
   const [showShelfModalId, setShowShelfModalId] = useState<string | null>(null);
@@ -1562,6 +1590,31 @@ function Stage3Page() {
                   alt="jupbox"
                   className="w-full h-full object-cover p-0.5 rounded-lg shadow-sm"
                 />
+
+                {/* Music Notes */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
+                  {jukeboxNotes.map(note => (
+                    <motion.div
+                      key={note.id}
+                      initial={{ opacity: 0.8, y: 0, x: 0 }}
+                      animate={{
+                        opacity: 0,
+                        y: -40 - Math.random() * 20,
+                        x: note.offset,
+                        rotate: note.offset > 0 ? 15 : -15
+                      }}
+                      transition={{ duration: 2, ease: "easeOut" }}
+                      className="absolute text-black font-bold select-none"
+                      style={{
+                        left: '50%',
+                        fontSize: '14px',
+                        textShadow: '0 0 3px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      {['♪', '♫', '♬', '♩'][Math.floor(note.id % 4)]}
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
               {/* Library Side Shelves */}
