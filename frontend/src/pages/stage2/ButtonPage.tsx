@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { completeStage, STAGES, saveStage2Progress, loadStage2Progress, clearStage2Progress } from '../../lib/storage';
+import { completeStage, STAGES, saveStage2Progress, loadStage2Progress, clearStage2Progress, MinigameView } from '../../lib/storage';
 import { setFavicon } from '../../lib/favicon';
 
 // Minigame flow: button → flappy → typing → memory. "Stage" = dash star (wordhunt, stage2, stage3).
-type MinigameView = 'stage2' | 'stage3-flappy' | 'stage4-typing' | 'stage5-memory';
+
 
 function ButtonPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Current stage state
@@ -70,8 +71,9 @@ function ButtonPage() {
   ]);
   const [flappyY, setFlappyY] = useState(300);
   const [flappyVelocity, setFlappyVelocity] = useState(0);
-  const [pipes, setPipes] = useState<Array<{ x: number; gapY: number; id: number; passed: boolean }>>([]);
+  const [pipes, setPipes] = useState<Array<{ x: number; gapY: number; gap: number; id: number; passed: boolean }>>([]);
   const [flappyScore, setFlappyScore] = useState(0);
+  const [gameComplete, setGameComplete] = useState(false);
   const [flappyGameOver, setFlappyGameOver] = useState(false);
   const [flappyStarted, setFlappyStarted] = useState(false);
   const [flappyTextIndex, setFlappyTextIndex] = useState(0);
@@ -83,7 +85,6 @@ function ButtonPage() {
   const JUMP_FORCE = -10;
   const PIPE_WIDTH = 60;
 
-  // ==================== STAGE 4 TYPING STATE ====================
   // ==================== STAGE 4 TYPING STATE ====================
   const targetParagraph = `"Yeah." He nods, scratching his quill against the parchment as he begins
 to take notes. "That has to be it. You missed it."
@@ -102,20 +103,19 @@ Or it had to have been marked classified. I just missed it.`;
   const [typingPhase, setTypingPhase] = useState<'start' | 'active' | 'result'>('start');
   const [typingResultState, setTypingResultState] = useState<'success' | 'fail-speed' | 'fail-accuracy' | null>(null);
 
-  // ==================== STAGE 5 MEMORY STATE ====================
-  const MEMORY_GOAL = 4;
-  const [memoryPhase, setMemoryPhase] = useState<'watch' | 'repeat' | 'result'>('watch');
-  const [pattern, setPattern] = useState<number[]>([]);
-  const [playerInput, setPlayerInput] = useState<number[]>([]);
-  const [currentShowIndex, setCurrentShowIndex] = useState(-1);
-  const [memoryScore, setMemoryScore] = useState(0);
-  const [memoryLevel, setMemoryLevel] = useState(1);
-  const [memorySpeed, setMemorySpeed] = useState(800);
-  const [memorySuccess, setMemorySuccess] = useState(false);
-  const [memoryFail, setMemoryFail] = useState(false);
-  const [gridSize] = useState(4);
-  const [buttonPositions, setButtonPositions] = useState<Array<{ x: number; y: number }>>([]);
-  const [gameComplete, setGameComplete] = useState(false);
+  // ==================== STAGE 3 DIALOGUE STATE ====================
+  const postFlappyTexts = useRef<string[]>([
+    'wow u actually did it',
+    'no way',
+    'hmmm',
+    'ur pretty good at this',
+    'but',
+    'lets see',
+    'if u can type fast ehehe',
+    'get ready...'
+  ]);
+  const [postFlappyIndex, setPostFlappyIndex] = useState(0);
+
 
   // ==================== STAGE 2 FUNCTIONS ====================
   const getCurrentBtnSize = () => {
@@ -198,6 +198,12 @@ Or it had to have been marked classified. I just missed it.`;
 
   // Load saved progress on mount
   useEffect(() => {
+    // Check if we requested a reset via navigation state
+    if (location.state?.reset) {
+      clearStage2Progress();
+      return;
+    }
+
     const savedProgress = loadStage2Progress();
     if (savedProgress) {
       setClicks(savedProgress.clicks);
@@ -207,7 +213,7 @@ Or it had to have been marked classified. I just missed it.`;
       if (savedProgress.runClickCount) setRunClickCount(savedProgress.runClickCount);
       if (savedProgress.fakeClickCount) setFakeClickCount(savedProgress.fakeClickCount);
     }
-  }, []);
+  }, [location.state]);
 
   // Auto-save progress whenever key state changes
   useEffect(() => {
@@ -325,6 +331,16 @@ Or it had to have been marked classified. I just missed it.`;
     }
   }, [textIndex, generateRandomPosition, generateGridPositions, clamp, centerButton, currentStage, buttonMode]);
 
+  // Handle Stage 3 dialogue setup
+  useEffect(() => {
+    if (currentStage === 'stage3-dialogue') {
+      setButtonSize('medium');
+      btnSize.current = defaultBtnSize;
+      setButtonMode('single');
+      centerButton();
+    }
+  }, [currentStage, centerButton]);
+
   const handleFakeClick = useCallback(() => {
     // Fake buttons do nothing
   }, []);
@@ -434,6 +450,17 @@ Or it had to have been marked classified. I just missed it.`;
     });
   }, [textIndex, buttonMode, clamp, generateRandomPosition, generateGridPositions, currentStage]);
 
+  const handlePostFlappyClick = useCallback(() => {
+    setPostFlappyIndex(prev => {
+      const next = prev + 1;
+      if (next >= postFlappyTexts.current.length) {
+        setCurrentStage('stage4-typing');
+        return prev;
+      }
+      return next;
+    });
+  }, []);
+
   const renderButton = (position: { x: number; y: number }, isReal: boolean, index?: number) => {
     const size = getCurrentBtnSize();
     const buttonStyle = {
@@ -448,7 +475,7 @@ Or it had to have been marked classified. I just missed it.`;
     return (
       <motion.button
         key={index !== undefined ? `btn-${index}` : 'main-btn'}
-        onClick={isReal ? handleRealClick : handleFakeClick}
+        onClick={isReal ? (currentStage === 'stage2' ? handleRealClick : handlePostFlappyClick) : handleFakeClick}
         className={`${faint && isReal
           ? 'bg-white/20 text-purple-300/30'
           : isReal
@@ -489,8 +516,11 @@ Or it had to have been marked classified. I just missed it.`;
       setFlappyVelocity(v => Math.min(v + GRAVITY, 12));
       setFlappyY(y => {
         const newY = y + flappyVelocity;
+        const containerHeight = containerRef.current?.offsetHeight || 600;
+        const groundHeight = 48; // h-12
+
         // Check floor/ceiling collision
-        if (newY < 0 || newY > 550) {
+        if (newY < 0 || newY > containerHeight - groundHeight - FLAPPY_SIZE) {
           setFlappyGameOver(true);
           return y;
         }
@@ -521,7 +551,7 @@ Or it had to have been marked classified. I just missed it.`;
               if (newScore >= FLAPPY_GOAL) {
                 setFlappyTextIndex(18);
                 setTimeout(() => {
-                  setCurrentStage('stage4-typing');
+                  setCurrentStage('stage3-dialogue');
                 }, 2000);
               }
               return newScore;
@@ -535,7 +565,7 @@ Or it had to have been marked classified. I just missed it.`;
             const buttonTop = flappyY;
             const buttonBottom = flappyY + FLAPPY_SIZE;
             const gapTop = pipe.gapY;
-            const gapBottom = pipe.gapY + pipeGap;
+            const gapBottom = pipe.gapY + (pipe.gap || pipeGap);
 
             if (buttonTop < gapTop || buttonBottom > gapBottom) {
               setFlappyGameOver(true);
@@ -558,6 +588,7 @@ Or it had to have been marked classified. I just missed it.`;
       setPipes(prev => [...prev, {
         x: 900,
         gapY: Math.random() * 300 + 50,
+        gap: pipeGap,
         id: Date.now(),
         passed: false
       }]);
@@ -630,7 +661,7 @@ Or it had to have been marked classified. I just missed it.`;
   // Update stats periodically while active
   useEffect(() => {
     if (typingPhase !== 'active') return;
-    const statsInterval = setInterval(calculateStats, 1000);
+    const statsInterval = setInterval(calculateStats, 100);
     return () => clearInterval(statsInterval);
   }, [typingPhase, calculateStats]);
 
@@ -717,7 +748,8 @@ Or it had to have been marked classified. I just missed it.`;
         if (finalWpm >= 70 && finalAccuracy >= 85) {
           setTypingResultState('success');
           setTimeout(() => {
-            setCurrentStage('stage5-memory');
+            setGameComplete(true);
+            completeStage(STAGES.STAGE2);
           }, 2000);
         } else if (finalWpm < 70) {
           setTypingResultState('fail-speed');
@@ -728,113 +760,7 @@ Or it had to have been marked classified. I just missed it.`;
     }
   }, [typedText, targetParagraph, typingPhase, typingStartTime]);
 
-  // ==================== STAGE 5 MEMORY FUNCTIONS ====================
 
-  // Generate button positions for memory game
-  useEffect(() => {
-    if (currentStage !== 'stage5-memory') return;
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const buttonSizeM = 80;
-    const padding = 40;
-    const availableWidth = rect.width - padding * 2 - buttonSizeM;
-    const availableHeight = rect.height - 200 - buttonSizeM;
-
-    const positions = [];
-    const cols = 2;
-    const rows = 2;
-    const cellWidth = availableWidth / cols;
-    const cellHeight = availableHeight / rows;
-
-    for (let i = 0; i < gridSize; i++) {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      positions.push({
-        x: padding + col * cellWidth + cellWidth / 2 - buttonSizeM / 2 + 100,
-        y: 150 + row * cellHeight + cellHeight / 2 - buttonSizeM / 2,
-      });
-    }
-    setButtonPositions(positions);
-  }, [currentStage, gridSize]);
-
-  // Generate new pattern - level 1 = 4, level 2 = 5, level 3 = 6, level 4 = 7
-  const generatePattern = useCallback(() => {
-    const patternLength = 3 + memoryLevel;
-    const newPattern = [];
-    for (let i = 0; i < patternLength; i++) {
-      newPattern.push(Math.floor(Math.random() * gridSize));
-    }
-    setPattern(newPattern);
-    setPlayerInput([]);
-    setMemoryPhase('watch');
-    setCurrentShowIndex(-1);
-  }, [memoryLevel, gridSize]);
-
-  // Initialize memory game
-  useEffect(() => {
-    if (currentStage === 'stage5-memory' && pattern.length === 0) {
-      generatePattern();
-    }
-  }, [currentStage, generatePattern, pattern.length]);
-
-  // Show pattern animation
-  useEffect(() => {
-    if (currentStage !== 'stage5-memory' || memoryPhase !== 'watch' || pattern.length === 0) return;
-
-    let index = 0;
-    const showNext = () => {
-      if (index < pattern.length) {
-        setCurrentShowIndex(index);
-        index++;
-        setTimeout(() => {
-          setCurrentShowIndex(-1);
-          setTimeout(showNext, memorySpeed / 4);
-        }, memorySpeed);
-      } else {
-        setMemoryPhase('repeat');
-      }
-    };
-
-    setTimeout(showNext, 500);
-  }, [currentStage, memoryPhase, pattern, memorySpeed]);
-
-  const handleMemoryClick = useCallback((index: number) => {
-    if (memoryPhase !== 'repeat' || currentStage !== 'stage5-memory') return;
-
-    const newInput = [...playerInput, index];
-    setPlayerInput(newInput);
-
-    const currentTarget = pattern[newInput.length - 1];
-
-    if (index !== currentTarget) {
-      setMemoryFail(true);
-      setTimeout(() => setMemoryFail(false), 500);
-      setMemoryPhase('result');
-      setTimeout(() => generatePattern(), 1500);
-      return;
-    }
-
-    if (newInput.length === pattern.length) {
-      setMemorySuccess(true);
-      setTimeout(() => setMemorySuccess(false), 500);
-      setMemoryScore(prev => prev + pattern.length);
-      setMemoryPhase('result');
-
-      const nextLevel = memoryLevel + 1;
-      setMemoryLevel(nextLevel);
-
-      if (nextLevel > MEMORY_GOAL) {
-        setGameComplete(true);
-        completeStage(STAGES.STAGE2);
-        // setTimeout(() => navigate('/dash'), 1500); // Wait for manual click
-      } else {
-        setTimeout(() => generatePattern(), 1000);
-      }
-    }
-  }, [memoryPhase, playerInput, pattern, memoryLevel, generatePattern, currentStage, navigate]);
 
   // ==================== RENDER ====================
 
@@ -845,8 +771,7 @@ Or it had to have been marked classified. I just missed it.`;
       ref={containerRef}
       className={`relative min-h-screen font-serif select-none overflow-hidden ${currentStage === 'stage2' ? 'bg-gradient-to-br from-indigo-50 via-purple-50 to-violet-50' :
         currentStage === 'stage3-flappy' ? 'bg-[#f3e8ff]' :
-          currentStage === 'stage4-typing' ? 'bg-[#c4b8b0]' :
-            'bg-[#e8d4f0]'
+          'bg-[#c4b8b0]'
         }`}
       style={{ userSelect: 'none' }}
       onClick={currentStage === 'stage3-flappy' ? flappyJump : undefined}
@@ -945,9 +870,9 @@ Or it had to have been marked classified. I just missed it.`;
                 className="absolute bg-gradient-to-r from-[#fefce8] to-[#faefd7]"
                 style={{
                   left: pipe.x,
-                  top: pipe.gapY + pipeGap,
+                  top: pipe.gapY + (pipe.gap || pipeGap),
                   width: PIPE_WIDTH,
-                  height: 600 - pipe.gapY - pipeGap,
+                  bottom: 0,
                   borderRadius: '8px 8px 0 0',
                 }}
               />
@@ -997,7 +922,7 @@ Or it had to have been marked classified. I just missed it.`;
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCurrentStage('stage4-typing');
+                    setCurrentStage('stage3-dialogue');
                   }}
                   className="absolute top-2 right-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-500 px-2 py-1 rounded"
                 >
@@ -1072,8 +997,21 @@ Or it had to have been marked classified. I just missed it.`;
                 >
                   {typingResultState === 'success' && (
                     <>
-                      <div className="text-6xl mb-4">✨</div>
-                      <div className="text-3xl font-bold text-green-600 mb-2">nice</div>
+                      <div className="mb-4">
+                        <svg
+                          width="64"
+                          height="64"
+                          viewBox="0 0 24 24"
+                          fill="rgb(216, 180, 254)"
+                          stroke="rgb(216, 180, 254)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      </div>
+                      <div className="text-3xl font-bold text-purple-300 mb-2">nice</div>
                     </>
                   )}
 
@@ -1098,85 +1036,58 @@ Or it had to have been marked classified. I just missed it.`;
         </div>
       )}
 
-      {/* ==================== STAGE 5 MEMORY RENDER ==================== */}
-      {currentStage === 'stage5-memory' && (
+      {/* ==================== STAGE 3 DIALOGUE RENDER ==================== */}
+      {currentStage === 'stage3-dialogue' && (
         <>
-          {/* Animated background */}
-          <div className="absolute inset-0 overflow-hidden">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-32 h-32 rounded-full bg-white/5"
-                style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-                animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.2, 0.1] }}
-                transition={{ duration: 3 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}
-              />
-            ))}
+          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+            <div className="text-purple-300 text-2xl font-medium text-center bg-white px-4 py-2 rounded-lg pointer-events-none">
+              {postFlappyTexts.current[postFlappyIndex]}
+            </div>
           </div>
-
-          {/* Success/Fail flash */}
-          <AnimatePresence>
-            {memorySuccess && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-green-500 pointer-events-none z-40" />}
-            {memoryFail && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-red-500 pointer-events-none z-40" />}
-          </AnimatePresence>
-
-          {/* Memory buttons - fully circular, same pink as button minigame */}
-          <div className="relative w-full h-full">
-            {buttonPositions.map((bpos, index) => {
-              const isActive = currentShowIndex >= 0 && pattern[currentShowIndex] === index;
-
-              return (
-                <motion.button
-                  key={index}
-                  onClick={() => handleMemoryClick(index)}
-                  className="absolute rounded-full transition-all duration-100 bg-purple-400/70"
-                  style={{
-                    left: bpos.x,
-                    top: bpos.y,
-                    width: 80,
-                    height: 80,
-                    boxShadow: isActive ? '0 0 40px #f9a8d4, 0 0 80px #f9a8d4' : '0 4px 20px rgba(0,0,0,0.3)',
-                  }}
-                  animate={{ scale: isActive ? 1.2 : 1 }}
-                  whileHover={{ scale: memoryPhase === 'repeat' ? 1.05 : 1 }}
-                  whileTap={{ scale: memoryPhase === 'repeat' ? 0.95 : 1 }}
-                  disabled={memoryPhase !== 'repeat'}
-                />
-              );
-            })}
-          </div>
-
-          {/* Game complete overlay */}
-          {gameComplete && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 bg-black/50 flex items-center justify-center z-50"
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-white rounded-2xl p-8 max-w-md w-full text-center mx-4"
-              >
-                <h2 className="text-3xl font-serif text-purple-300 mb-4">
-                  yay gjgj
-                </h2>
-                <p className="text-xl text-purple-200 mb-2">ur def naman</p> {/* Should be ahana */}
-                <p className="text-lg text-purple-200 mb-6">
-                  🌟
-                </p>
-                <motion.button
-                  onClick={() => navigate('/dash')}
-                  className="bg-purple-300 text-white rounded-xl py-3 px-8 text-lg font-medium"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  dashboard
-                </motion.button>
-              </motion.div>
-            </motion.div>
-          )}
+          {renderButton(pos, true, 999)}
         </>
+      )}
+
+      {/* Game complete overlay */}
+      {gameComplete && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full text-center mx-4"
+          >
+            <h2 className="text-3xl font-serif text-purple-300 mb-4">
+              yay gjgj
+            </h2>
+            <p className="text-xl text-purple-200 mb-2">ur def naman</p>
+            <div className="flex justify-center mb-6">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="rgb(216, 180, 254)"
+                stroke="rgb(216, 180, 254)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </div>
+            <motion.button
+              onClick={() => navigate('/dash')}
+              className="bg-purple-300 text-white rounded-xl py-3 px-8 text-lg font-medium"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              dashboard
+            </motion.button>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* Back button (all stages) */}
@@ -1191,19 +1102,7 @@ Or it had to have been marked classified. I just missed it.`;
         back
       </motion.button>
 
-      {/* Skip stage (testing) */}
-      <motion.button
-        onClick={() => {
-          completeStage(STAGES.STAGE2);
-          navigate('/dash');
-        }}
-        className="fixed right-4 top-4 backdrop-blur-sm rounded-lg px-3 py-2 text-sm bg-amber-200/90 text-amber-900 hover:bg-amber-300/90 transition-colors select-none z-50"
-        style={{ userSelect: 'none' }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        Skip stage (testing)
-      </motion.button>
+
 
     </div>
   );

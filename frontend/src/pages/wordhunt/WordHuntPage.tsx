@@ -9,7 +9,7 @@ import { setFavicon } from '../../lib/favicon';
 const GRID_LETTERS = ["q", "l", "p", "s", "a", "a", "h", "s", "e", "t", "l", "e", "h", "t", "f", "f"];
 const GRID_SIZE = 4;
 const TIME_LIMIT = 90; // seconds
-const TARGET_SCORE = 2000;
+const TARGET_SCORE = 13000;
 
 // Scoring system
 const getScore = (wordLength: number): number => {
@@ -263,26 +263,18 @@ function WordHuntPage() {
           </svg>
         </motion.button>
         <h1 className="text-4xl font-serif text-pink-300 mb-2">word hunt</h1>
-        <motion.button
-          onClick={skipStage}
-          className="absolute right-0 top-0 bg-amber-200/90 text-amber-900 rounded-lg px-3 py-2 text-sm hover:bg-amber-300/90 transition-colors"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Skip stage (testing)
-        </motion.button>
       </div>
 
       {/* Timer and Score */}
       <div className="flex gap-8 mb-6">
         <div className="bg-white/70 backdrop-blur-sm rounded-xl px-6 py-3 text-center">
-          <div className="text-sm text-pink-300">Time</div>
+          <div className="text-sm text-pink-300">time</div>
           <div className={`text-3xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-pink-300'}`}>
             {timeLeft}s
           </div>
         </div>
         <div className="bg-white/70 backdrop-blur-sm rounded-xl px-6 py-3 text-center">
-          <div className="text-sm text-pink-300">Score</div>
+          <div className="text-sm text-pink-300">score</div>
           <div className="text-3xl font-bold text-pink-300">
             <CountingNumber
               number={score}
@@ -397,7 +389,7 @@ function WordHuntPage() {
               <h2 className="text-3xl font-serif text-pink-300 mb-4">
                 {hasWon ? 'yay gjgj' : '⏰ time\'s up!'}
               </h2>
-              <p className="text-xl text-pink-200 mb-2">ur def naman</p> {/* Should be ahana */}
+              <p className="text-xl text-pink-200 mb-2">ur def ahana</p>
               <p className="text-lg text-pink-200 mb-6">
                 {hasWon
                   ? `🌟`

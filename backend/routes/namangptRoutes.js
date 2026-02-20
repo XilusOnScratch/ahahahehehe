@@ -138,7 +138,7 @@ router.post('/verify-email', async (req, res) => {
 
     try {
         const trimmedEmail = email.trim().toLowerCase();
-        const correctEmail = 'kathleenchen203@gmail.com'; // FOR TESTING. Later change it to ahana.virmani@gmail.com
+        const correctEmail = 'ahana.virmani@gmail.com';
 
         if (trimmedEmail === correctEmail) {
             // Send email with the encoded message

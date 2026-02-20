@@ -1273,12 +1273,7 @@ function Stage3Page() {
       }}
     >
       <div className="absolute top-4 right-4 flex gap-4 z-50">
-        <button
-          onClick={handleReset}
-          className="text-sm font-medium text-red-600/60 hover:text-red-600 transition-colors"
-        >
-          reset progress
-        </button> {/* TESTING: Reset progress button */}
+
         <motion.button
           onClick={() => navigate('/dash')}
           className="text-sm font-medium text-[#8B7355] hover:scale-105 transition-transform"

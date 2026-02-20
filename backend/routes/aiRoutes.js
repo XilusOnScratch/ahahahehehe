@@ -27,7 +27,7 @@ router.post('/analyze-image', async (req, res) => {
                     role: 'user',
                     parts: [
                         {
-                            text: "Does this image contain a phone or a handheld electronic device that looks like a smartphone? Answer with only 'yes' or 'no'." // TESTING: Should instead be checking for an object shaped like a butterfly that is white
+                            text: "Does this image contain a white/grey object with a similar shape to a butterfly? Answer with only 'yes' or 'no'."
                         },
                         {
                             inlineData: {

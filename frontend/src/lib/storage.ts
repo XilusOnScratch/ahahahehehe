@@ -109,7 +109,7 @@ export const getFirstIncompleteStage = (): string | null => {
 };
 
 // Stage 2 Progress Management
-export type MinigameView = 'stage2' | 'stage3-flappy' | 'stage4-typing' | 'stage5-memory';
+export type MinigameView = 'stage2' | 'stage3-flappy' | 'stage3-dialogue' | 'stage4-typing';
 
 export interface Stage2Progress {
   clicks: number;

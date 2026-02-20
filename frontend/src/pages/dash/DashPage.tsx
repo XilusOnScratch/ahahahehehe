@@ -65,7 +65,7 @@ function DashPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <h1 className={`text-6xl font-serif ${textColor} mb-2 transition-colors duration-1000`}>welcome, naman.</h1> {/* Testing!! Should be ahana */}
+          <h1 className={`text-6xl font-serif ${textColor} mb-2 transition-colors duration-1000`}>welcome, ahana.</h1>
           <p className={`text-2xl ${textColorLight} transition-colors duration-1000`}>hehe</p>
         </motion.div>
 
@@ -89,7 +89,16 @@ function DashPage() {
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.6 + star * 0.1 }}
                   className={isUnlocked ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                  onClick={() => isUnlocked && navigate(stagePath)}
+                  onClick={() => {
+                    if (isUnlocked) {
+                      // If it's stage 2 and completed, pass reset: true to restart
+                      if (star === 2 && isStage2Completed) {
+                        navigate(stagePath, { state: { reset: true } });
+                      } else {
+                        navigate(stagePath);
+                      }
+                    }
+                  }}
                   whileHover={isUnlocked ? { scale: 1.15 } : {}}
                   whileTap={isUnlocked ? { scale: 0.95 } : {}}
                 >
@@ -114,16 +123,7 @@ function DashPage() {
 
       </motion.div>
 
-      {/* Reset Button (Testing) */}
-      <button
-        onClick={() => {
-          resetProgress();
-          window.location.reload();
-        }}
-        className="absolute bottom-4 right-4 text-xs text-gray-400 hover:text-red-500 transition-colors opacity-50 hover:opacity-100"
-      >
-        reset all stages
-      </button>
+
     </motion.div>
   );
 }

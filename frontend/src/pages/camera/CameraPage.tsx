@@ -18,12 +18,16 @@ function Camera() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState(null);
 
+  const streamRef = useRef<MediaStream | null>(null);
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
         audio: false,
       });
+
+      streamRef.current = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -46,15 +50,18 @@ function Camera() {
   };
 
   const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach((track: MediaStreamTrack) => track.stop());
-      (videoRef.current as HTMLVideoElement).srcObject = null;
-      setCameraActive(false);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
-    if (backgroundVideoRef.current && backgroundVideoRef.current.srcObject) {
-      (backgroundVideoRef.current as HTMLVideoElement).srcObject = null;
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
+    if (backgroundVideoRef.current) {
+      backgroundVideoRef.current.srcObject = null;
+    }
+    setCameraActive(false);
   };
 
   const takePhoto = () => {
@@ -124,20 +131,23 @@ function Camera() {
           setIsProcessing(false);
 
           if (data.success && data.profile) {
-            // Check if the matched person is naman - TESTING!! Should actually be ahana
+            // Check if the matched person is ahana
             const matchedName = data.profile.name.toLowerCase();
-            if (matchedName.includes('naman')) {
+            if (matchedName.includes('ahana')) {
               // Store the matched profile
               setMatchedProfile(data.profile);
 
               // Save authentication status to localStorage
               setAuthenticated(true);
 
+              // Stop camera explicitly before navigating
+              stopCamera();
+
               // Navigate to dashboard after successful face unlock
               navigate('/dash');
             } else {
-              // Not naman, show error - SHOULD BE ahana
-              setErrorMessage('Access denied. Only Naman is authorized.');
+              // Not ahana, show error
+              setErrorMessage('Access denied. Only Ahana is authorized.');
             }
           } else {
             // No match found, show error
@@ -176,7 +186,7 @@ function Camera() {
       {/* Full-screen blurred background camera */}
       <video
         ref={backgroundVideoRef}
-        className="absolute inset-0 w-full h-full opacity-3 0 object-cover opacity-10 blur-3xl scale-110"
+        className="absolute inset-0 w-full h-full object-cover opacity-10 blur-3xl scale-110"
         playsInline
         autoPlay
         muted
@@ -243,7 +253,7 @@ function Camera() {
         >
           {/* Camera container */}
           <motion.div
-            className="relative w-full max-w-2xl aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/30"
+            className="relative w-full max-w-2xl aspect-[16/9] rounded-md overflow-hidden"
             initial={{ y: 20 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}

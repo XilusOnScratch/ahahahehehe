@@ -50,8 +50,8 @@ function PinPage() {
         className="w-full max-w-sm text-center"
       >
         {/* Faded Title */}
-        <h1 className="text-4xl font-serif text-gray-900 opacity-[0.5%] mb-12 select-none">
-          last three digits
+        <h1 className="text-4xl font-serif text-gray-900 opacity-[0.6%] mb-12 select-none">
+          last three digits of ur phone number
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
