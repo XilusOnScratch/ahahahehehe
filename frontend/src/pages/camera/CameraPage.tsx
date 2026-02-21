@@ -147,17 +147,17 @@ function Camera() {
               navigate('/dash');
             } else {
               // Not ahana, show error
-              setErrorMessage('Access denied. Only Ahana is authorized.');
+              setErrorMessage('access denied. only ahana is authorized.');
             }
           } else {
             // No match found, show error
-            setErrorMessage('Face not recognized. Please try again.');
+            setErrorMessage('face not recognized. please try again.');
           }
         })
         .catch(error => {
           console.error('Error connecting to backend:', error);
           setIsProcessing(false);
-          setErrorMessage(error?.message || 'Face not found. Please try again.');
+          setErrorMessage(error?.message || ' face not found. please try again.');
         });
     }, 'image/jpeg', 0.8);
   };
