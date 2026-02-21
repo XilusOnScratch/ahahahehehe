@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sparkles from 'react-sparkle';
 import HTMLFlipBook from 'react-pageflip';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { saveStage3Progress, loadStage3Progress, clearStage3Progress, completeStage, STAGES } from '../../lib/storage';
 import { setFavicon } from '../../lib/favicon';
 
@@ -455,6 +455,8 @@ function Stage3Page() {
   const [showCamera, setShowCamera] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [cameraMessage, setCameraMessage] = useState('');
+  const [hasCaptured, setHasCaptured] = useState(false);
+  const [isFlashActive, setIsFlashActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -483,9 +485,14 @@ function Stage3Page() {
     if (!videoRef.current || !canvasRef.current) return;
 
     setIsAnalyzing(true);
+    setHasCaptured(true);
     setCameraMessage("analyzing reflection...");
+    setIsFlashActive(true);
+    setTimeout(() => setIsFlashActive(false), 200);
 
     const video = videoRef.current;
+    if (video) video.pause(); // Freeze the video
+
     const canvas = canvasRef.current;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -537,6 +544,8 @@ function Stage3Page() {
         setCameraMessage("didn't find what i was looking for");
         setTimeout(() => {
           setCameraMessage("");
+          setHasCaptured(false);
+          if (videoRef.current) videoRef.current.play();
         }, 2000);
       }
     } catch (err) {
@@ -614,6 +623,8 @@ function Stage3Page() {
     setIsBridgeFixed(false);
     setBookPage(1);
     setBookInput('');
+    setHasCaptured(false);
+    setIsFlashActive(false);
   };
 
   // Load saved progress on mount
@@ -800,7 +811,7 @@ function Stage3Page() {
   };
 
   const handleOvenUnlock = () => {
-    if (ovenUnlockInput === '🍉') {
+    if (ovenUnlockInput === '😛') {
       setIsOvenOpen(true);
       setOvenPhase('baking');
     }
@@ -1866,10 +1877,31 @@ function Stage3Page() {
                 </button>
                 <h2 className="text-[#5a4a3a] font-mono text-xl mb-4 text-center">window</h2>
                 <div className="relative aspect-video bg-black overflow-hidden border-2 border-[#A69076]">
-                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-                  <canvas ref={canvasRef} className="hidden" />
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className={`w-full h-full object-cover ${hasCaptured ? 'hidden' : 'block'}`}
+                  />
+                  <canvas
+                    ref={canvasRef}
+                    className={`w-full h-full object-cover ${hasCaptured ? 'block' : 'hidden'}`}
+                  />
+
+                  {/* Flash Effect */}
+                  <AnimatePresence>
+                    {isFlashActive && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-white z-20"
+                      />
+                    )}
+                  </AnimatePresence>
+
                   {isAnalyzing && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-10">
                       <div className="w-8 h-8 border-4 border-[#F5EEE6] border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
@@ -1935,7 +1967,7 @@ function Stage3Page() {
                       onKeyDown={e => e.key === 'Enter' && handleOvenUnlock()}
                     />
                     <div className="flex flex-col items-center">
-                      <p className="text-transparent cursor-default text-[8px]">silly child 🎄</p>
+                      <p className="text-transparent text-[8px]">it requires an emoji.</p>
                       <button
                         onClick={handleOvenUnlock}
                         className="mt-4 px-6 py-2 bg-[#8B7355] text-white rounded-full hover:bg-[#6B5B4F] transition-colors"

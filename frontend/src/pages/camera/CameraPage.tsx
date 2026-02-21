@@ -13,6 +13,7 @@ function Camera() {
   const [cameraActive, setCameraActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [photoData, setPhotoData] = useState<string | null>(null);
+  const [isFlashActive, setIsFlashActive] = useState(false);
 
   // New states for backend interaction
   const [isProcessing, setIsProcessing] = useState(false);
@@ -84,6 +85,13 @@ function Camera() {
       // Store the photo data as a base64 string
       const photoDataUrl = (canvasRef.current as HTMLCanvasElement).toDataURL('image/jpeg');
       setPhotoData(photoDataUrl);
+
+      // Flash effect and pause everything
+      setIsFlashActive(true);
+      setTimeout(() => setIsFlashActive(false), 150);
+
+      if (videoRef.current) videoRef.current.pause();
+      if (backgroundVideoRef.current) backgroundVideoRef.current.pause();
     }
   };
 
@@ -94,6 +102,8 @@ function Camera() {
       ctx.clearRect(0, 0, (canvasRef.current as HTMLCanvasElement).width, (canvasRef.current as HTMLCanvasElement).height);
       setHasPhoto(false);
       setPhotoData(null);
+      if (videoRef.current) videoRef.current.play();
+      if (backgroundVideoRef.current) backgroundVideoRef.current.play();
     }
   };
 
@@ -193,6 +203,18 @@ function Camera() {
         style={{ filter: 'blur(40px) brightness(0.7)', transform: 'scaleX(-1)' }}
       ></video>
 
+      {/* Background Flash */}
+      <AnimatePresence>
+        {isFlashActive && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-white z-[5] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Overlay gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-pink-200/50 via-purple-200/40 to-pink-200/50" />
 
@@ -273,6 +295,18 @@ function Camera() {
               transition={{ duration: 0.3 }}
             ></motion.canvas>
 
+            {/* In-container Flash */}
+            <AnimatePresence>
+              {isFlashActive && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-white z-20 pointer-events-none"
+                />
+              )}
+            </AnimatePresence>
+
             {/* Processing Overlay */}
             <AnimatePresence>
               {isProcessing && (
@@ -320,6 +354,18 @@ function Camera() {
                 '○'
               )}
             </motion.button>
+
+            {hasPhoto && !isProcessing && (
+              <motion.button
+                onClick={clearPhoto}
+                className="text-white/60 hover:text-white transition-colors text-sm font-light mt-2"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                retake
+              </motion.button>
+            )}
           </motion.div>
         </motion.div>
       </motion.div>
