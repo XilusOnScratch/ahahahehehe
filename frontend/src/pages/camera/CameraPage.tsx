@@ -143,7 +143,7 @@ function Camera() {
           if (data.success && data.profile) {
             // Check if the matched person is ahana
             const matchedName = data.profile.name.toLowerCase();
-            if (matchedName.includes('ahana')) {
+            if (matchedName.includes('naman')) {
               // Store the matched profile
               setMatchedProfile(data.profile);
 
