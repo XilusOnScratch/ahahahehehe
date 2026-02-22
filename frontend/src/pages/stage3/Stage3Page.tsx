@@ -541,12 +541,12 @@ function Stage3Page() {
           stopCamera();
         }, 1500);
       } else {
-        setCameraMessage("didn't find what i was looking for");
+        setCameraMessage(aiResponse || "didn't find what i was looking for");
         setTimeout(() => {
           setCameraMessage("");
           setHasCaptured(false);
           if (videoRef.current) videoRef.current.play();
-        }, 2000);
+        }, 3000);
       }
     } catch (err) {
       console.error("AI error:", err);

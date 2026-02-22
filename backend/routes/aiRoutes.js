@@ -27,7 +27,7 @@ router.post('/analyze-image', async (req, res) => {
                     role: 'user',
                     parts: [
                         {
-                            text: "Does this image contain an object shaped like a butterfly? Answer with only 'yes' or 'no'."
+                            text: "Does this image contain an object shaped like a butterfly? If yes, respond with 'yes'. If no, identify the main object in the image and respond with 'no: [object name]'."
                         },
                         {
                             inlineData: {
@@ -41,8 +41,13 @@ router.post('/analyze-image', async (req, res) => {
         });
 
         // Access the text directly from the response object
-        const text = response.text;
+        let text = response.text.toLowerCase().trim();
         console.log('AI Proxy: Gemini response:', text);
+
+        if (text.includes('no:')) {
+            const objectName = text.split('no:')[1].trim().replace(/\.$/, '');
+            text = `i see ${objectName}. not exactly what ur looking for tho...`;
+        }
 
         res.json({ analysisResult: text });
     } catch (error) {
