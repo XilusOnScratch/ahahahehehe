@@ -27,7 +27,7 @@ router.post('/analyze-image', async (req, res) => {
                     role: 'user',
                     parts: [
                         {
-                            text: "Does this image contain a white/grey object with a similar shape to a butterfly? Answer with only 'yes' or 'no'."
+                            text: "Does this image contain an object shaped like a butterfly? Answer with only 'yes' or 'no'."
                         },
                         {
                             inlineData: {
