@@ -313,7 +313,7 @@ function Stage3Page() {
 
   // Current room and message
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
-  const [fullText, setFullText] = useState('you wake up in a strange house...');
+  const [fullText, setFullText] = useState('you wake up in a strange place...');
   const [textIndex, setTextIndex] = useState(0);
 
   // Living room: table popup (typewriter) and penguin dialogue/passcode popup
@@ -535,6 +535,8 @@ function Stage3Page() {
             location: 'house',
             color: '#ff0000'
           }]);
+          setFullText("you find a cookie cutter!");
+          setTextIndex(0);
         }
         setTimeout(() => {
           setShowCamera(false);
@@ -614,7 +616,7 @@ function Stage3Page() {
     setPlayerY(6);
     setInventory([]);
     setItems(INITIAL_ITEMS);
-    setFullText('you wake up in a strange house...');
+    setFullText('you wake up in a strange place...');
     setTextIndex(0);
     setCurrentRoom(null);
     setIsOvenOpen(false);
@@ -795,7 +797,7 @@ function Stage3Page() {
     if (passcodeInput === '1') {
       if (!inventory.some(i => i.id === 'k3')) {
         setInventory(prev => [...prev, LIVING_ROOM_KEY]);
-        setFullText(`You found a ${LIVING_ROOM_KEY.name}!`);
+        setFullText(`you found a ${LIVING_ROOM_KEY.name}!`);
         setTextIndex(0);
       }
       setShowPenguinPopup(false);
@@ -986,8 +988,8 @@ function Stage3Page() {
       playerY >= BEDROOM_BED_POS.y && playerY < BEDROOM_BED_POS.y + 2;
 
     if (isOnBed) {
-      if (fullText !== "zzzz... ok stop pretending to sleep.") {
-        setFullText("zzzz... ok stop pretending to sleep.");
+      if (fullText !== "zzzz... ok stop pretending to sleep now.") {
+        setFullText("zzzz... ok stop pretending to sleep now.");
         setTextIndex(0);
       }
       return;
@@ -1186,7 +1188,7 @@ function Stage3Page() {
             openTablePopup();
           }
           if (nearWindow) {
-            setFullText("u stare back at ur reflection in the window");
+            setFullText("you stare back at your reflection in the window");
             setTextIndex(0);
             setShowCamera(true);
             setCameraMessage("");
@@ -1851,7 +1853,7 @@ function Stage3Page() {
                           };
                           return copy;
                         });
-                        setFullText("u got the gold key!");
+                        setFullText("you got a gold key!");
                         setTextIndex(0);
                         setShowPenguinPopup(false);
                       }}

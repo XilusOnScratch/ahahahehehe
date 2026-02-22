@@ -169,11 +169,6 @@ function WordHuntPage() {
     setCurrentWord('');
   };
 
-  const skipStage = () => {
-    completeStage(STAGES.WORDHUNT);
-    saveWordHuntScore(TARGET_SCORE);
-    navigate('/dash');
-  };
 
   const resetGame = () => {
     // Don't allow reset if already completed
@@ -263,16 +258,6 @@ function WordHuntPage() {
           </svg>
         </motion.button>
         <h1 className="text-4xl font-serif text-pink-300 mb-2">word hunt</h1>
-
-        {/* Skip Button for Testing */}
-        <motion.button
-          onClick={skipStage}
-          className="absolute right-0 top-0 bg-white/70 backdrop-blur-sm text-pink-300 rounded-lg px-4 py-2 hover:bg-white/90 transition-colors text-sm font-bold"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          skip
-        </motion.button>
       </div>
 
       {/* Timer and Score */}
