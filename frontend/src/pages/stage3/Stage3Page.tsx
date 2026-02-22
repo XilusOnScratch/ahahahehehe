@@ -546,7 +546,7 @@ function Stage3Page() {
           setCameraMessage("");
           setHasCaptured(false);
           if (videoRef.current) videoRef.current.play();
-        }, 3000);
+        }, 6000);
       }
     } catch (err) {
       console.error("AI error:", err);
