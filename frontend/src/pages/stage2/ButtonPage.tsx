@@ -116,6 +116,12 @@ Or it had to have been marked classified. I just missed it.`;
   ]);
   const [postFlappyIndex, setPostFlappyIndex] = useState(0);
 
+  const skipStage = () => {
+    completeStage(STAGES.STAGE2);
+    clearStage2Progress();
+    navigate('/dash');
+  };
+
 
   // ==================== STAGE 2 FUNCTIONS ====================
   const getCurrentBtnSize = () => {
@@ -1100,6 +1106,18 @@ Or it had to have been marked classified. I just missed it.`;
         whileTap={{ scale: 0.9 }}
       >
         back
+      </motion.button>
+
+      {/* Skip button (top right) */}
+      <motion.button
+        onClick={skipStage}
+        className={`fixed right-4 top-4 backdrop-blur-sm rounded-lg px-4 py-2 hover:bg-white/20 transition-colors select-none z-50 text-sm font-bold ${currentStage === 'stage2' ? 'bg-purple-200/90 text-purple-800' : 'bg-white/10 text-white/80'
+          }`}
+        style={{ userSelect: 'none' }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        skip
       </motion.button>
 
 

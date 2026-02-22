@@ -263,6 +263,16 @@ function WordHuntPage() {
           </svg>
         </motion.button>
         <h1 className="text-4xl font-serif text-pink-300 mb-2">word hunt</h1>
+
+        {/* Skip Button for Testing */}
+        <motion.button
+          onClick={skipStage}
+          className="absolute right-0 top-0 bg-white/70 backdrop-blur-sm text-pink-300 rounded-lg px-4 py-2 hover:bg-white/90 transition-colors text-sm font-bold"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          skip
+        </motion.button>
       </div>
 
       {/* Timer and Score */}
@@ -387,13 +397,13 @@ function WordHuntPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-3xl font-serif text-pink-300 mb-4">
-                {hasWon ? 'yay gjgj' : '⏰ time\'s up!'}
+                {hasWon ? 'yay gjgj' : 'time\'s up!'}
               </h2>
-              <p className="text-xl text-pink-200 mb-2">ur def ahana</p>
+              <p className="text-xl text-pink-200 mb-2">ur score does not qualify</p>
               <p className="text-lg text-pink-200 mb-6">
                 {hasWon
                   ? `🌟`
-                  : `:(`
+                  : `ik u can do better`
                 }
               </p>
               <div className="flex gap-4 justify-center flex-wrap">
