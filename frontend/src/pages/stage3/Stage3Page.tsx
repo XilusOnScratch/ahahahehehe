@@ -393,7 +393,27 @@ function Stage3Page() {
 
   const [activeClosetDialogue, setActiveClosetDialogue] = useState<string[]>(CLOSET_DIALOGUE);
   const [showLetterPopup, setShowLetterPopup] = useState(false);
-  const LETTER_CONTENT = (import.meta.env.VITE_LETTER_CONTENT || "").replace(/\\n/g, '\n');
+  const [currentTimeStr, setCurrentTimeStr] = useState('');
+
+  useEffect(() => {
+    if (showLetterPopup) {
+      const updateTime = () => {
+        const start = new Date('2026-02-23T00:00:00');
+        const now = new Date();
+        const diff = Math.max(0, now.getTime() - start.getTime());
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / (1000 * 60)) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+        setCurrentTimeStr(`${d} days, ${h} hours, ${m} mins, ${s} secs`);
+      };
+      updateTime();
+      const interval = setInterval(updateTime, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showLetterPopup]);
+
+  const LETTER_CONTENT = (import.meta.env.VITE_LETTER_CONTENT || "").replace(/\\n/g, '\n').replace('[time]', currentTimeStr);
 
   const [isJukeboxPlaying, setIsJukeboxPlaying] = useState(false);
   const [jukeboxNotes, setJukeboxNotes] = useState<{ id: number; offset: number }[]>([]);
