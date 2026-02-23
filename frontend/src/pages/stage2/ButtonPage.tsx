@@ -64,7 +64,7 @@ function ButtonPage() {
     'how r u alive',
     'impressive...',
     'ok ok u win',
-    'score 20 to pass',
+    'score 6 to pass',
     'almost there!',
     'ayyy gj',
     'onto typing...'
@@ -79,7 +79,7 @@ function ButtonPage() {
   const [flappyTextIndex, setFlappyTextIndex] = useState(0);
   const [pipeSpeed, setPipeSpeed] = useState(3);
   const [pipeGap, setPipeGap] = useState(180);
-  const FLAPPY_GOAL = 20;
+  const FLAPPY_GOAL = 6;
   const FLAPPY_SIZE = 50;
   const GRAVITY = 0.6;
   const JUMP_FORCE = -10;
@@ -920,15 +920,7 @@ Or it had to have been marked classified. I just missed it.`;
                 animate={{ scale: 1 }}
                 className="bg-white/90 backdrop-blur-md rounded-2xl p-8 text-center relative"
               >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentStage('stage3-dialogue');
-                  }}
-                  className="absolute top-2 right-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-500 px-2 py-1 rounded"
-                >
-                  Skip
-                </button>
+
                 <div className="text-6xl mb-4">{flappyGameOver ? '' : ''}</div>
                 <div className="text-2xl font-bold text-gray-800 mb-2">
                   {flappyGameOver ? ':(' : ''}
