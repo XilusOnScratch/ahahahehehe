@@ -1,8 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const router = express.Router();
+
+// Initialize Resend (uses HTTPS, not SMTP - works on Render)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Initialize the Google Gen AI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -192,30 +195,13 @@ router.post('/verify-email', async (req, res) => {
 });
 
 async function sendEmail(recipientEmail) {
-    console.log('--- STARTING SEND EMAIL (PORT 587/STARTTLS) ---');
-    console.log('User:', process.env.EMAIL_USER);
-    console.log('Recipient:', recipientEmail);
-
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // Use false for STARTTLS (Port 587)
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD ? process.env.EMAIL_PASSWORD.trim() : ''
-        },
-        tls: {
-            rejectUnauthorized: false // Helps avoid handshake issues in cloud environments
-        },
-        connectionTimeout: 15000,
-        debug: true,
-        logger: true
-    });
+    console.log('--- SENDING EMAIL VIA RESEND (HTTPS) ---');
+    console.log('To:', recipientEmail);
+    console.log('Resend API key exists:', !!process.env.RESEND_API_KEY);
 
     try {
-        console.log('Attempting SMTP handshake...');
-        const info = await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        const { data, error } = await resend.emails.send({
+            from: 'namangpt support <namangpt@ahahahehehe.tech>',
             to: recipientEmail,
             subject: 'is this what you\'re looking for?',
             text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
@@ -229,12 +215,16 @@ async function sendEmail(recipientEmail) {
                 </div>
             `
         });
-        console.log('Email successfully sent! ID:', info.messageId);
+
+        if (error) {
+            console.error('Resend error:', error);
+            return false;
+        }
+
+        console.log('Email sent successfully via Resend! ID:', data.id);
         return true;
     } catch (e) {
-        console.log('--- EMAIL SENDING FAILED ---');
-        console.error('Error Code:', e.code);
-        console.error('Error Message:', e.message);
+        console.error('Resend exception:', e.message);
         return false;
     }
 }
