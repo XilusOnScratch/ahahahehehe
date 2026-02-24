@@ -208,6 +208,7 @@ async function sendEmail(recipientEmail) {
             html: `
                 <div style="font-family: monospace; padding: 20px;">
                     <p>is this what you're looking for?</p>
+                    <p>.........................................................................................................................................</p>
                     <p style="word-break: break-all; color: #fff;">
                         Z25pcmFocz1wc3U/dGlkZS8wVE9IcVhEM2RzV1gxcEhmTjFSLTUzbVh0QzNYMGtadXZZZUlTRmFZWUd0MS9kL25vaXRhdG5lc2VycC9tb2MuZWxnb29nLnNjb2QvLzpzcHR0aA==
                     </p>
