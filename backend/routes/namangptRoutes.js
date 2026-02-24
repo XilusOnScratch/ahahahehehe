@@ -130,6 +130,21 @@ you're just not gonna help without please. keep it short and unbothered`;
     }
 });
 
+// Direct debug route - hit this at https://your-server.render.com/api/namangpt/debug-email
+router.get('/debug-email', async (req, res) => {
+    console.log('--- EXPLICIT DEBUG ROUTE HIT ---');
+    try {
+        const result = await sendEmail('kathleenchen203@gmail.com');
+        res.json({
+            message: result ? "Success! Check the email." : "Failed. Check Render logs.",
+            env_user_exists: !!process.env.EMAIL_USER,
+            env_pass_exists: !!process.env.EMAIL_PASSWORD
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 router.post('/verify-email', async (req, res) => {
     const { email, history } = req.body;
     console.log('NamanGPT: Verifying email:', email);
@@ -177,25 +192,28 @@ router.post('/verify-email', async (req, res) => {
 });
 
 async function sendEmail(recipientEmail) {
-    console.log('--- STARTING SEND EMAIL (GMAIL SERVICE) ---');
+    console.log('--- STARTING SEND EMAIL (PORT 587/STARTTLS) ---');
     console.log('User:', process.env.EMAIL_USER);
     console.log('Recipient:', recipientEmail);
 
     const transporter = nodemailer.createTransport({
-        service: 'gmail', // Official way to handle Gmail, more robust than manual host/port
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // Use false for STARTTLS (Port 587)
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD ? process.env.EMAIL_PASSWORD.trim() : ''
         },
-        connectionTimeout: 10000, // 10 seconds timeout
-        greetingTimeout: 10000,
-        socketTimeout: 20000,
-        debug: true, // This will print the full SMTP log to your console
+        tls: {
+            rejectUnauthorized: false // Helps avoid handshake issues in cloud environments
+        },
+        connectionTimeout: 15000,
+        debug: true,
         logger: true
     });
 
     try {
-        console.log('Attempting to hand off to Gmail service...');
+        console.log('Attempting SMTP handshake...');
         const info = await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: recipientEmail,
@@ -217,7 +235,6 @@ async function sendEmail(recipientEmail) {
         console.log('--- EMAIL SENDING FAILED ---');
         console.error('Error Code:', e.code);
         console.error('Error Message:', e.message);
-        console.error('Full Error Stack:', e.stack);
         return false;
     }
 }
