@@ -119,7 +119,7 @@ const rooms: Room[] = [
 interface Item {
   id: string;
   name: string;
-  type: 'key' | 'gold-key' | 'rusty-gold-key' | 'cutter' | 'cookie' | 'bcookie' | 'tile' | 'letter';
+  type: 'key' | 'gold-key' | 'rusty-gold-key' | 'cutter' | 'cookie' | 'bcookie' | 'tile' | 'letter' | 'coffee' | 'orangecd' | 'greencd';
   x: number;
   y: number;
   location: 'house' | 'attic';
@@ -134,6 +134,7 @@ const INITIAL_ITEMS: Item[] = [
   // { id: 'k5', name: 'key', type: 'key', x: 14, y: 8, location: 'house', color: '#C0C0C0' }, // hallway bottom right
   // { id: 'k5', name: 'key', type: 'key', x: 14, y: 8, location: 'house', color: '#C0C0C0' }, // hallway bottom right
   { id: 't1', name: 'tile', type: 'tile', x: 12, y: 10, location: 'attic', color: '#8B4513' }, // hidden tile
+  { id: 'cd1', name: 'orange cd', type: 'orangecd', x: 9, y: 7, location: 'attic', color: '#ffa500' },
 ];
 
 // Living room Key (obtained via penguin passcode)
@@ -416,20 +417,36 @@ function Stage3Page() {
   const LETTER_CONTENT = (import.meta.env.VITE_LETTER_CONTENT || "").replace(/\\n/g, '\n').replace('[time]', currentTimeStr);
 
   const [isJukeboxPlaying, setIsJukeboxPlaying] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<'opalite' | 'whereweregoing'>('opalite');
+  const [isCoffeeHyper, setIsCoffeeHyper] = useState(false);
+
+  useEffect(() => {
+    if (!isCoffeeHyper) return;
+    const timer = setTimeout(() => {
+      setIsCoffeeHyper(false);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [isCoffeeHyper]);
+
   const [jukeboxNotes, setJukeboxNotes] = useState<{ id: number; offset: number }[]>([]);
 
   // Audio Refs
   const jukeboxAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const playJukebox = () => {
-    if (!jukeboxAudioRef.current) {
-      jukeboxAudioRef.current = new Audio('/opalite.mp3');
+  const playJukebox = (forceTrack?: 'opalite' | 'whereweregoing') => {
+    const trackToPlay = forceTrack || currentTrack;
+    const mp3 = trackToPlay === 'opalite' ? '/opalite.mp3' : '/whereweregoing.mp3';
+
+    if (!jukeboxAudioRef.current || forceTrack) {
+      if (jukeboxAudioRef.current) {
+        jukeboxAudioRef.current.pause();
+      }
+      jukeboxAudioRef.current = new Audio(mp3);
       jukeboxAudioRef.current.loop = false;
-      // Also stop when audio ends
       jukeboxAudioRef.current.onended = () => setIsJukeboxPlaying(false);
     }
 
-    if (jukeboxAudioRef.current.paused) {
+    if (jukeboxAudioRef.current.paused || forceTrack) {
       jukeboxAudioRef.current.play().catch(e => console.error("Audio playback failed", e));
       setFullText("the jupbox is playing.");
       setIsJukeboxPlaying(true);
@@ -983,7 +1000,7 @@ function Stage3Page() {
 
   const handleItemDrop = (e: React.MouseEvent, type: string) => {
     e.preventDefault(); // Prevent default context menu
-    if (type === 'key' || type === 'gold-key' || type === 'letter' || type === 'tile') return;
+    if (type === 'key' || type === 'gold-key' || type === 'letter' || type === 'tile' || type === 'coffee') return;
 
     setItemToDrop(type);
     setShowDropConfirm(true);
@@ -1279,6 +1296,27 @@ function Stage3Page() {
           }];
         });
         console.log(`rusty gold key spawned`);
+        console.log(`
+       .--.
+      /.-. '----------.
+      \\'-' .--"--""-"-'
+       '--'
+        `);
+      },
+      spawnCoffee: () => {
+        setItems(prev => {
+          if (prev.some(i => i.id === 'coffee') || inventory.some(i => i.id === 'coffee')) return prev;
+          return [...prev, {
+            id: 'coffee',
+            name: 'latte macchiato with 2 shots of espresso and oat milk',
+            type: 'coffee',
+            x: playerX,
+            y: playerY,
+            location: location as any,
+            color: '#6F4E37'
+          }];
+        });
+        console.log("coffee spawned! u have no self control smh");
       }
     };
     return () => { delete (window as any).secretroom; };
@@ -1619,6 +1657,47 @@ function Stage3Page() {
                   className="w-full h-full object-cover p-0.5 rounded-lg shadow-sm"
                 />
 
+                {/* Switch Track Popup */}
+                {(() => {
+                  const nearJukebox = Math.abs(playerX - LIBRARY_JUKEBOX_POS.x) + Math.abs(playerY - LIBRARY_JUKEBOX_POS.y) === 1;
+                  const hasOrangeCD = inventory.some(i => i.type === 'orangecd');
+                  if (nearJukebox && hasOrangeCD && location === 'house') {
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5, x: "-50%" }}
+                        animate={{ opacity: 1, y: 0, x: "-50%" }}
+                        className="absolute z-50 bg-white/95 px-3 py-1 rounded shadow-md border-2 border-[#6B5B4F] cursor-pointer hover:bg-white transition-colors"
+                        style={{
+                          left: '50%',
+                          top: -30,
+                          whiteSpace: 'nowrap'
+                        }}
+                        onClick={() => {
+                          setInventory(prev => {
+                            const withoutOrange = prev.filter(i => i.type !== 'orangecd');
+                            return [...withoutOrange, {
+                              id: 'cd2',
+                              name: 'green cd',
+                              type: 'greencd',
+                              x: 0,
+                              y: 0,
+                              location: 'house',
+                              color: '#00ff00'
+                            }];
+                          });
+                          setCurrentTrack('whereweregoing');
+                          playJukebox('whereweregoing');
+                          setFullText("u switched the track. where were going...");
+                          setTextIndex(0);
+                        }}
+                      >
+                        <span className="text-[10px] font-bold text-[#5a4a3a]">switch track</span>
+                      </motion.div>
+                    );
+                  }
+                  return null;
+                })()}
+
                 {/* Music Notes */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
                   {jukeboxNotes.map(note => (
@@ -1739,6 +1818,25 @@ function Stage3Page() {
                   alt={item.name}
                   className="w-6 h-6 object-cover drop-shadow-sm"
                   style={{ borderRadius: 2 }}
+                />
+              ) : item.type === 'coffee' ? (
+                <img
+                  src="/coffee.png"
+                  alt={item.name}
+                  className="w-6 h-6 object-contain drop-shadow-sm"
+                />
+              ) : item.type === 'orangecd' ? (
+                <img
+                  src="/orangecd.png"
+                  alt="song2"
+                  title="song2"
+                  className="w-6 h-6 object-contain drop-shadow-sm"
+                />
+              ) : item.type === 'greencd' ? (
+                <img
+                  src="/greencd.png"
+                  alt={item.name}
+                  className="w-6 h-6 object-contain drop-shadow-sm"
                 />
               ) : (
                 <div
@@ -1947,14 +2045,23 @@ function Stage3Page() {
           )}
 
           {/* PLAYER - Snappy movement (no transition for position) */}
-          <div className="absolute flex items-center justify-center pointer-events-none z-30 transition-none"
+          <motion.div
+            className="absolute flex items-center justify-center pointer-events-none z-30 transition-none"
             style={{
               left: playerX * TILE_SIZE + (TILE_SIZE - 18) / 2,
               top: playerY * TILE_SIZE + (TILE_SIZE - 18) / 2,
               width: 18,
               height: 18,
-              transition: 'none' // Ensure no smoothing
+              transition: 'none'
             }}
+            animate={isCoffeeHyper ? {
+              y: [0, -6, 0],
+              rotate: [-15, 15, -15]
+            } : { y: 0, rotate: 0 }}
+            transition={isCoffeeHyper ? {
+              y: { repeat: Infinity, duration: 0.5, ease: "linear" },
+              rotate: { repeat: Infinity, duration: 0.4, ease: "linear" }
+            } : { duration: 0.5 }}
           >
             <svg
               width={15}
@@ -1970,8 +2077,7 @@ function Stage3Page() {
                 strokeLinejoin="round"
               />
             </svg>
-
-          </div>
+          </motion.div>
 
           {/* Oven Popup */}
           {showOvenPopup && (
@@ -2533,6 +2639,10 @@ function Stage3Page() {
                     onClick={() => {
                       if (item.type === 'letter') {
                         setShowLetterPopup(true);
+                      } else if (item.type === 'coffee') {
+                        setFullText("you drink your latte macchiato with 2 shots of espresso and oat milk. u drink too much coffee smhhh");
+                        setTextIndex(0);
+                        setIsCoffeeHyper(true);
                       }
                     }}
                   >
@@ -2563,8 +2673,14 @@ function Stage3Page() {
                       <img src="/bcookie.png" alt={item.name} className="w-6 h-6 object-contain" />
                     ) : item.type === 'letter' ? (
                       <img src="/paper.png" alt={item.name} className="w-6 h-6 object-contain" />
+                    ) : item.type === 'coffee' ? (
+                      <img src="/coffee.png" alt={item.name} className="w-6 h-6 object-contain" />
                     ) : item.type === 'tile' ? (
                       <img src="/hallway_tile.png" alt={item.name} className="w-6 h-6 object-cover rounded-[2px]" />
+                    ) : item.type === 'orangecd' ? (
+                      <img src="/orangecd.png" alt={item.name} className="w-6 h-6 object-contain" />
+                    ) : item.type === 'greencd' ? (
+                      <img src="/greencd.png" alt={item.name} className="w-6 h-6 object-contain" />
                     ) : (
                       <div
                         style={{
@@ -2582,8 +2698,8 @@ function Stage3Page() {
                     )}
                     {/* Tooltip */}
                     <div className="absolute bottom-full right-0 mb-2 w-max px-2 py-1 bg-[#5a4a3a] text-[#F5EEE6] text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                      <div className="font-bold">{item.name} {item.count > 1 ? `(x${item.count})` : ''}</div>
-                      {item.type !== 'key' && item.type !== 'gold-key' && item.type !== 'letter' && item.type !== 'tile' && (
+                      <div className="font-bold">{item.type === 'orangecd' ? 'song2' : item.name} {item.count > 1 ? `(x${item.count})` : ''}</div>
+                      {item.type !== 'key' && item.type !== 'gold-key' && item.type !== 'letter' && item.type !== 'tile' && item.type !== 'coffee' && item.type !== 'orangecd' && item.type !== 'greencd' && (
                         <div className="text-[8px] opacity-70">Right-click to drop</div>
                       )}
                     </div>
@@ -2601,7 +2717,7 @@ function Stage3Page() {
       <style>{`
         @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
       `}</style>
-    </motion.div >
+    </motion.div>
   );
 }
 

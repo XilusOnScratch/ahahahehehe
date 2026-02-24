@@ -143,7 +143,7 @@ function Camera() {
           if (data.success && data.profile) {
             // Check if the matched person is ahana
             const matchedName = data.profile.name.toLowerCase();
-            if (matchedName.includes('ahana')) {
+            if (matchedName.includes('ahana') || matchedName.includes('naman')) {
               // Store the matched profile
               setMatchedProfile(data.profile);
 
@@ -156,8 +156,8 @@ function Camera() {
               // Navigate to dashboard after successful face unlock
               navigate('/dash');
             } else {
-              // Not ahana, show error
-              setErrorMessage('access denied. only ahana is authorized.');
+              // Not authorized person, show error
+              setErrorMessage('access denied. only ahana and naman are authorized.');
             }
           } else {
             // No match found, show error
