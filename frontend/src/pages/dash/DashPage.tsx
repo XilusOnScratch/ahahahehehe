@@ -45,9 +45,23 @@ function DashPage() {
   // Devtools helper
   React.useEffect(() => {
     (window as any).windowx = {
-      skip: () => {
+      skip1: () => {
+        completeStage(STAGES.WORDHUNT);
+        window.location.reload();
+      },
+      skip2: () => {
+        completeStage(STAGES.STAGE2);
+        window.location.reload();
+      },
+      skip3: () => {
         completeStage(STAGES.STAGE3);
-        window.location.reload(); // Reload to show the new star
+        window.location.reload();
+      },
+      skipAll: () => {
+        completeStage(STAGES.WORDHUNT);
+        completeStage(STAGES.STAGE2);
+        completeStage(STAGES.STAGE3);
+        window.location.reload();
       }
     };
     return () => {
