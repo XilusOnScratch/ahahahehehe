@@ -96,11 +96,11 @@ you're just not gonna help without please. keep it short and unbothered`;
         let response = result.text.toLowerCase().trim();
 
         // Fallback check - character breaks
-        const breakIndicators = 
-            response.length > 80 || 
-            response.includes('!') || 
+        const breakIndicators =
+            response.length > 80 ||
+            response.includes('!') ||
             response.includes('*') ||
-            response.includes("google") || 
+            response.includes("google") ||
             response.includes("large language model");
 
         if (breakIndicators) {
@@ -142,12 +142,19 @@ router.post('/verify-email', async (req, res) => {
 
         if (trimmedEmail === correctEmail) {
             // Send email with the encoded message
-            await sendEmail(trimmedEmail);
+            const sent = await sendEmail(trimmedEmail);
 
-            res.json({
-                response: "verified! check ur email for what ur looking for",
-                verified: true
-            });
+            if (sent) {
+                res.json({
+                    response: "verified! check ur email for what ur looking for",
+                    verified: true
+                });
+            } else {
+                res.json({
+                    response: "i tried sending it but something broke... maybe try again later?",
+                    verified: false
+                });
+            }
         } else {
             res.json({
                 response: "hmm that email isn't verified... u sure that's the right one?",
@@ -166,39 +173,47 @@ router.post('/verify-email', async (req, res) => {
 async function sendEmail(recipientEmail) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
         console.error('NamanGPT Error: EMAIL_USER or EMAIL_PASSWORD not set in env');
-        return;
+        return false;
     }
 
-    console.log(`NamanGPT: Attempting to send email from ${process.env.EMAIL_USER}...`);
+    console.log(`NamanGPT: Attempting to send email from ${process.env.EMAIL_USER} to ${recipientEmail}...`);
 
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // use SSL
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD.trim() // Trim just in case
-        }
+            pass: process.env.EMAIL_PASSWORD.trim()
+        },
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,
+        socketTimeout: 10000
     });
 
-   const mailOptions = {
-    from: `"namangpt" <${process.env.EMAIL_USER}>`,
-    to: recipientEmail,
-    subject: 'is this what you\'re looking for?',
-    text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
-    html: `
-        <p>is this what you're looking for?</p>
-        <p>
-            <code style="color: #ffffff;">
-                aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==
-            </code>
-        </p>
-    `
-};
+    const mailOptions = {
+        from: `"namangpt" <${process.env.EMAIL_USER}>`,
+        to: recipientEmail,
+        subject: 'is this what you\'re looking for?',
+        text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
+        html: `
+            <div style="font-family: monospace; padding: 20px; background-color: #f5f5f5;">
+                <p>is this what you're looking for?</p>
+                <p style="word-break: break-all; background-color: #333; color: #fff; padding: 10px; border-radius: 5px;">
+                    aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==
+                </p>
+                <p style="font-size: 0.8em; color: #666;">- naman</p>
+            </div>
+        `
+    };
 
     try {
         await transporter.sendMail(mailOptions);
         console.log('NamanGPT: Email sent successfully to:', recipientEmail);
+        return true;
     } catch (error) {
         console.error('NamanGPT: Error sending email:', error.message);
+        return false;
     }
 }
 
