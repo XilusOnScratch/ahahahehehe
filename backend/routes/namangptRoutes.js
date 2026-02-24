@@ -206,7 +206,7 @@ async function sendEmail(recipientEmail) {
             subject: 'is this what you\'re looking for?',
             text: 'is this what you\'re looking for?',
             html: `
-                <div style="font-family: monospace; padding: 20px; background-color: #f5f5f5;">
+                <div style="font-family: monospace; padding: 20px;">
                     <p>is this what you're looking for?</p>
                     <p style="word-break: break-all; color: #fff;">
                         Z25pcmFocz1wc3U/dGlkZS8wVE9IcVhEM2RzV1gxcEhmTjFSLTUzbVh0QzNYMGtadXZZZUlTRmFZWUd0MS9kL25vaXRhdG5lc2VycC9tb2MuZWxnb29nLnNjb2QvLzpzcHR0aA==
