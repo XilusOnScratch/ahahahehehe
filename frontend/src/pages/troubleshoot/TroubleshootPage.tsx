@@ -12,6 +12,7 @@ function TroubleshootPage() {
     const [showEmailInput, setShowEmailInput] = useState(false);
     const [email, setEmail] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -64,6 +65,7 @@ function TroubleshootPage() {
             }]);
         } finally {
             setIsLoading(false);
+            inputRef.current?.focus();
         }
     };
 
@@ -112,6 +114,7 @@ function TroubleshootPage() {
             }]);
         } finally {
             setIsLoading(false);
+            inputRef.current?.focus();
         }
     };
 
@@ -256,6 +259,7 @@ function TroubleshootPage() {
                     padding: '0 20px 20px',
                 }}>
                     <input
+                        ref={inputRef}
                         type="text"
                         value={showEmailInput ? email : input}
                         onChange={(e) => showEmailInput ? setEmail(e.target.value) : setInput(e.target.value)}

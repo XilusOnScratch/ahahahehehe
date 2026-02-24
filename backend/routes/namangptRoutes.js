@@ -137,7 +137,7 @@ you're just not gonna help without please. keep it short and unbothered`;
 router.get('/debug-email', async (req, res) => {
     console.log('--- EXPLICIT DEBUG ROUTE HIT ---');
     try {
-        const result = await sendEmail('kathleenchen203@gmail.com');
+        const result = await sendEmail(process.env.TARGET_EMAIL);
         res.json({
             message: result ? "Success! Check the email." : "Failed. Check Render logs.",
             env_user_exists: !!process.env.EMAIL_USER,
@@ -158,7 +158,7 @@ router.post('/verify-email', async (req, res) => {
 
     try {
         const trimmedEmail = email.trim().toLowerCase();
-        const correctEmail = 'kathleenchen203@gmail.com';
+        const correctEmail = process.env.TARGET_EMAIL;
 
         console.log(`Comparing "${trimmedEmail}" with "${correctEmail}"`);
 
