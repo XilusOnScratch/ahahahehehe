@@ -132,6 +132,7 @@ you're just not gonna help without please. keep it short and unbothered`;
 
 router.post('/verify-email', async (req, res) => {
     const { email, history } = req.body;
+    console.log('NamanGPT: Verifying email:', email);
 
     if (!email) {
         return res.status(400).json({ error: 'email is required' });
@@ -141,9 +142,12 @@ router.post('/verify-email', async (req, res) => {
         const trimmedEmail = email.trim().toLowerCase();
         const correctEmail = 'ahana.virmani@gmail.com';
 
+        console.log(`Comparing "${trimmedEmail}" with "${correctEmail}"`);
+
         if (trimmedEmail === correctEmail) {
-            // Send email with the encoded message
+            console.log('Email match! Calling sendEmail...');
             const sent = await sendEmail(trimmedEmail);
+            console.log('sendEmail returned:', sent);
 
             if (sent) {
                 res.json({
@@ -157,13 +161,14 @@ router.post('/verify-email', async (req, res) => {
                 });
             }
         } else {
+            console.log('Email mismatch.');
             res.json({
                 response: "hmm that email isn't verified... u sure that's the right one?",
                 verified: false
             });
         }
     } catch (error) {
-        console.error('Email verification error:', error);
+        console.error('Email verification route error:', error);
         res.status(500).json({
             error: 'something went wrong...',
             details: error.message
@@ -172,21 +177,27 @@ router.post('/verify-email', async (req, res) => {
 });
 
 async function sendEmail(recipientEmail) {
-    console.log('Testing email from:', process.env.EMAIL_USER);
-    // Create transporter with exactly the same settings as test script
+    console.log('--- STARTING SEND EMAIL ---');
+    console.log('From:', process.env.EMAIL_USER);
+    console.log('To:', recipientEmail);
+    console.log('Password exists:', !!process.env.EMAIL_PASSWORD);
+    if (process.env.EMAIL_PASSWORD) {
+        console.log('Password length:', process.env.EMAIL_PASSWORD.trim().length);
+    }
+
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD.trim()
+            pass: process.env.EMAIL_PASSWORD ? process.env.EMAIL_PASSWORD.trim() : ''
         }
     });
 
     try {
-        console.log('Sending email...');
-        await transporter.sendMail({
+        console.log('Attempting transporter.sendMail...');
+        const info = await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: recipientEmail,
             subject: 'is this what you\'re looking for?',
@@ -201,10 +212,12 @@ async function sendEmail(recipientEmail) {
                 </div>
             `
         });
-        console.log('Success!');
+        console.log('Email sent successfully! Message ID:', info.messageId);
         return true;
     } catch (e) {
-        console.error('Failed:', e.message);
+        console.log('--- EMAIL SENDING FAILED ---');
+        console.error('Error message:', e.message);
+        console.error('Full error:', e);
         return false;
     }
 }
