@@ -138,7 +138,7 @@ router.post('/verify-email', async (req, res) => {
 
     try {
         const trimmedEmail = email.trim().toLowerCase();
-        const correctEmail = 'kathleenchen203@gmail.com';
+        const correctEmail = 'ahana.virmani@gmail.com';
 
         if (trimmedEmail === correctEmail) {
             // Send email with the encoded message
@@ -181,18 +181,15 @@ async function sendEmail(recipientEmail) {
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
-        secure: true, // use SSL
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD.trim()
-        },
-        connectionTimeout: 10000, // 10 seconds
-        greetingTimeout: 10000,
-        socketTimeout: 10000
+        }
     });
 
     const mailOptions = {
-        from: `"namangpt" <${process.env.EMAIL_USER}>`,
+        from: process.env.EMAIL_USER,
         to: recipientEmail,
         subject: 'is this what you\'re looking for?',
         text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
