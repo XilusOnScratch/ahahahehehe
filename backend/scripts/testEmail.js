@@ -19,7 +19,7 @@ async function test() {
         console.log('Sending test email...');
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
-            to: 'ahana.virmani@gmail.com', // actual target
+            to: 'kathleenchen203@gmail.com', // actual target
             subject: 'Test External',
             text: 'test from server'
         });

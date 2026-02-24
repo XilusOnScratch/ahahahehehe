@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai');
 const nodemailer = require('nodemailer');
@@ -171,13 +172,8 @@ router.post('/verify-email', async (req, res) => {
 });
 
 async function sendEmail(recipientEmail) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-        console.error('NamanGPT Error: EMAIL_USER or EMAIL_PASSWORD not set in env');
-        return false;
-    }
-
-    console.log(`NamanGPT: Attempting to send email from ${process.env.EMAIL_USER} to ${recipientEmail}...`);
-
+    console.log('Testing email from:', process.env.EMAIL_USER);
+    // Create transporter with exactly the same settings as test script
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
@@ -188,28 +184,27 @@ async function sendEmail(recipientEmail) {
         }
     });
 
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: recipientEmail,
-        subject: 'is this what you\'re looking for?',
-        text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
-        html: `
-            <div style="font-family: monospace; padding: 20px; background-color: #f5f5f5;">
-                <p>is this what you're looking for?</p>
-                <p style="word-break: break-all; background-color: #333; color: #fff; padding: 10px; border-radius: 5px;">
-                    aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==
-                </p>
-                <p style="font-size: 0.8em; color: #666;">- naman</p>
-            </div>
-        `
-    };
-
     try {
-        await transporter.sendMail(mailOptions);
-        console.log('NamanGPT: Email sent successfully to:', recipientEmail);
+        console.log('Sending email...');
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: recipientEmail,
+            subject: 'is this what you\'re looking for?',
+            text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
+            html: `
+                <div style="font-family: monospace; padding: 20px; background-color: #f5f5f5;">
+                    <p>is this what you're looking for?</p>
+                    <p style="word-break: break-all; background-color: #333; color: #fff; padding: 10px; border-radius: 5px;">
+                        aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==
+                    </p>
+                    <p style="font-size: 0.8em; color: #666;">- naman</p>
+                </div>
+            `
+        });
+        console.log('Success!');
         return true;
-    } catch (error) {
-        console.error('NamanGPT: Error sending email:', error.message);
+    } catch (e) {
+        console.error('Failed:', e.message);
         return false;
     }
 }
