@@ -177,26 +177,25 @@ router.post('/verify-email', async (req, res) => {
 });
 
 async function sendEmail(recipientEmail) {
-    console.log('--- STARTING SEND EMAIL ---');
-    console.log('From:', process.env.EMAIL_USER);
-    console.log('To:', recipientEmail);
-    console.log('Password exists:', !!process.env.EMAIL_PASSWORD);
-    if (process.env.EMAIL_PASSWORD) {
-        console.log('Password length:', process.env.EMAIL_PASSWORD.trim().length);
-    }
+    console.log('--- STARTING SEND EMAIL (GMAIL SERVICE) ---');
+    console.log('User:', process.env.EMAIL_USER);
+    console.log('Recipient:', recipientEmail);
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        service: 'gmail', // Official way to handle Gmail, more robust than manual host/port
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD ? process.env.EMAIL_PASSWORD.trim() : ''
-        }
+        },
+        connectionTimeout: 10000, // 10 seconds timeout
+        greetingTimeout: 10000,
+        socketTimeout: 20000,
+        debug: true, // This will print the full SMTP log to your console
+        logger: true
     });
 
     try {
-        console.log('Attempting transporter.sendMail...');
+        console.log('Attempting to hand off to Gmail service...');
         const info = await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: recipientEmail,
@@ -212,12 +211,13 @@ async function sendEmail(recipientEmail) {
                 </div>
             `
         });
-        console.log('Email sent successfully! Message ID:', info.messageId);
+        console.log('Email successfully sent! ID:', info.messageId);
         return true;
     } catch (e) {
         console.log('--- EMAIL SENDING FAILED ---');
-        console.error('Error message:', e.message);
-        console.error('Full error:', e);
+        console.error('Error Code:', e.code);
+        console.error('Error Message:', e.message);
+        console.error('Full Error Stack:', e.stack);
         return false;
     }
 }
