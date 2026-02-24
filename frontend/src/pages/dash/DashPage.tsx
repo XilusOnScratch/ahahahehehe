@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { isStageCompleted, STAGES, resetProgress, getUserName } from '../../lib/storage';
+import { isStageCompleted, STAGES, resetProgress, getUserName, completeStage } from '../../lib/storage';
 
 function DashPage() {
   const navigate = useNavigate();
@@ -41,6 +41,19 @@ function DashPage() {
       };
     }
   }, [completedStarsCount]);
+
+  // Devtools helper
+  React.useEffect(() => {
+    (window as any).windowx = {
+      skip: () => {
+        completeStage(STAGES.STAGE3);
+        window.location.reload(); // Reload to show the new star
+      }
+    };
+    return () => {
+      delete (window as any).windowx;
+    };
+  }, []);
 
   return (
     <motion.div
