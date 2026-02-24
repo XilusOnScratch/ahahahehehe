@@ -204,12 +204,12 @@ async function sendEmail(recipientEmail) {
             from: 'namangpt support <namangpt@ahahahehehe.tech>',
             to: recipientEmail,
             subject: 'is this what you\'re looking for?',
-            text: 'is this what you\'re looking for? aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==',
+            text: 'is this what you\'re looking for?',
             html: `
                 <div style="font-family: monospace; padding: 20px; background-color: #f5f5f5;">
                     <p>is this what you're looking for?</p>
                     <p style="word-break: break-all; color: #fff;">
-                        aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMXRHWVlhRlNJZVl2dVprMFgzQ3RYbTM1LVIxTmZIcDFYV3NkM0RYcUhPVDAvZWRpdD91c3A9c2hhcmluZw==
+                        Z25pcmFocz1wc3U/dGlkZS8wVE9IcVhEM2RzV1gxcEhmTjFSLTUzbVh0QzNYMGtadXZZZUlTRmFZWUd0MS9kL25vaXRhdG5lc2VycC9tb2MuZWxnb29nLnNjb2QvLzpzcHR0aA==
                     </p>
                     <p style="font-size: 0.8em; color: #666;">- naman</p>
                 </div>
