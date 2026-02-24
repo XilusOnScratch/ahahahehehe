@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { setAuthenticated, isAuthenticated, isPinAuthenticated } from '../../lib/storage';
+import { setAuthenticated, isAuthenticated, isPinAuthenticated, setUserName } from '../../lib/storage';
 
 function Camera() {
   const navigate = useNavigate();
@@ -147,8 +147,10 @@ function Camera() {
               // Store the matched profile
               setMatchedProfile(data.profile);
 
-              // Save authentication status to localStorage
+              // Save authentication status and name to localStorage
               setAuthenticated(true);
+              const nameToStore = matchedName.includes('naman') ? 'naman' : 'ahana';
+              setUserName(nameToStore);
 
               // Stop camera explicitly before navigating
               stopCamera();

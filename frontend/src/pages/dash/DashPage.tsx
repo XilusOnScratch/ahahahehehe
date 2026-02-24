@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { isStageCompleted, STAGES, resetProgress } from '../../lib/storage';
+import { isStageCompleted, STAGES, resetProgress, getUserName } from '../../lib/storage';
 
 function DashPage() {
   const navigate = useNavigate();
   const isWordHuntCompleted = isStageCompleted(STAGES.WORDHUNT);
   const isStage2Completed = isStageCompleted(STAGES.STAGE2);
   const isStage3Completed = isStageCompleted(STAGES.STAGE3);
+  const userName = getUserName() || 'ahana';
 
   // Calculate completed stars count
   const completedStarsCount = useMemo(() => {
@@ -65,7 +66,7 @@ function DashPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <h1 className={`text-6xl font-serif ${textColor} mb-2 transition-colors duration-1000`}>welcome, ahana.</h1>
+          <h1 className={`text-6xl font-serif ${textColor} mb-2 transition-colors duration-1000`}>welcome, {userName}.</h1>
           <p className={`text-2xl ${textColorLight} transition-colors duration-1000`}>hehe</p>
         </motion.div>
 

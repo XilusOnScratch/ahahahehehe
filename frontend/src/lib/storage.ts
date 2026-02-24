@@ -7,7 +7,8 @@ const STORAGE_KEYS = {
   WORDHUNT_SCORE: 'wordhuntScore',
   STAGE2_PROGRESS: 'stage2Progress',
   STAGE3_PROGRESS: 'stage3Progress',
-  PIN_AUTHENTICATED: 'pinAuthenticated'
+  PIN_AUTHENTICATED: 'pinAuthenticated',
+  USER_NAME: 'userName'
 };
 
 export interface GameProgress {
@@ -48,6 +49,15 @@ export const setPinAuthenticated = (value: boolean) => {
   localStorage.setItem(STORAGE_KEYS.PIN_AUTHENTICATED, value.toString());
 };
 
+// Set and get user name
+export const setUserName = (name: string) => {
+  localStorage.setItem(STORAGE_KEYS.USER_NAME, name);
+};
+
+export const getUserName = (): string | null => {
+  return localStorage.getItem(STORAGE_KEYS.USER_NAME);
+};
+
 // Mark a stage as completed
 export const completeStage = (stageName: string) => {
   const progress = getGameProgress();
@@ -83,6 +93,7 @@ export const resetProgress = () => {
   localStorage.removeItem(STORAGE_KEYS.WORDHUNT_SCORE);
   localStorage.removeItem(STORAGE_KEYS.STAGE2_PROGRESS);
   localStorage.removeItem(STORAGE_KEYS.STAGE3_PROGRESS);
+  localStorage.removeItem(STORAGE_KEYS.USER_NAME);
 };
 
 // Stage names for reference (each "stage" = main star on dash: wordhunt, stage2, stage3, …)

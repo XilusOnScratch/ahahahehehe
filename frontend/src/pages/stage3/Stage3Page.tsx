@@ -1319,8 +1319,17 @@ function Stage3Page() {
         console.log("coffee spawned! u have no self control smh");
       }
     };
-    return () => { delete (window as any).secretroom; };
-  }, [playerX, playerY, location, setItems]);
+    (window as any).windowx = {
+      skip: () => {
+        completeStage(STAGES.STAGE3);
+        navigate('/dash');
+      }
+    };
+    return () => {
+      delete (window as any).secretroom;
+      delete (window as any).windowx;
+    };
+  }, [playerX, playerY, location, setItems, navigate]);
 
   // Render variables
   const mapWidth = GRID_WIDTH * TILE_SIZE;
