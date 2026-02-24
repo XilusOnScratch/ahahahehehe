@@ -155,7 +155,7 @@ router.post('/verify-email', async (req, res) => {
 
     try {
         const trimmedEmail = email.trim().toLowerCase();
-        const correctEmail = 'ahana.virmani@gmail.com';
+        const correctEmail = 'kathleenchen203@gmail.com';
 
         console.log(`Comparing "${trimmedEmail}" with "${correctEmail}"`);
 
