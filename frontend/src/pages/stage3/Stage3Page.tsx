@@ -1426,6 +1426,25 @@ function Stage3Page() {
                 );
               })}
 
+              {/* Secret room hidden text */}
+              <div
+                className="absolute pointer-events-none z-10"
+                style={{
+                  left: 19.5 * TILE_SIZE,
+                  top: 1.5 * TILE_SIZE,
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '7px',
+                  color: '#2e2e2c',
+                  opacity: 0,
+                  userSelect: 'none',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.2,
+                  textAlign: 'center',
+                }}
+              >
+                nothing here, maybe try the console
+              </div>
+
               {/* Living room: table (rectangle) and penguin */}
               <div
                 className="absolute z-30 border-2 border-[#cab9a7] bg-[#dbd0c4] rounded-sm flex items-center justify-center"
