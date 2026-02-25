@@ -1428,7 +1428,7 @@ function Stage3Page() {
 
               {/* Secret room hidden text */}
               <div
-                className="absolute pointer-events-none z-10"
+                className="absolute"
                 style={{
                   left: 19.5 * TILE_SIZE,
                   top: 1.5 * TILE_SIZE,
@@ -1440,6 +1440,7 @@ function Stage3Page() {
                   whiteSpace: 'nowrap',
                   lineHeight: 1.2,
                   textAlign: 'center',
+                  zIndex: 9999,
                 }}
               >
                 nothing here, maybe try the console
