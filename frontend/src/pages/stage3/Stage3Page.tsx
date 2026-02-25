@@ -1307,29 +1307,54 @@ function Stage3Page() {
         });
       },
       spawnCoffee: () => {
-        setItems(prev => {
-          if (prev.some(i => i.id === 'coffee') || inventory.some(i => i.id === 'coffee')) return prev;
-          return [...prev, {
-            id: 'coffee',
-            name: 'latte macchiato with 2 shots of espresso and oat milk',
-            type: 'coffee',
-            x: playerX,
-            y: playerY,
-            location: location as any,
-            color: '#6F4E37'
-          }];
-        });
-        const coffeeLines = [
-          'coffee spawned!',
+        if (inventory.some(i => i.id === 'coffee')) {
+          console.log('you already have coffee. one is enough.');
+          return;
+        }
+
+        const secretRoom = rooms.find(r => r.id === 'secret');
+        if (!secretRoom) return;
+
+        const availableTiles = secretRoom.tiles.filter(t =>
+          !(t.x === playerX && t.y === playerY && location === 'house')
+        );
+
+        if (availableTiles.length === 0) {
+          console.log('no available tiles in the secret room!');
+          return;
+        }
+
+        const randomTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
+
+        const asciiLines = [
           '     )))',
           '    (((',
           '  +-----+',
-          '  |         |]',
+          '  |      |]',
           "  `-----'",
         ];
-        coffeeLines.forEach((line, i) => {
+
+        asciiLines.forEach((line, i) => {
           setTimeout(() => console.log(line), i * 700);
         });
+
+        const spawnDelay = asciiLines.length * 700;
+
+        setTimeout(() => {
+          console.log('coffee spawned! u have no self control smh');
+          setItems(prev => {
+            if (prev.some(i => i.id === 'coffee')) return prev;
+            return [...prev, {
+              id: 'coffee',
+              name: 'latte macchiato with 2 shots of espresso and oat milk',
+              type: 'coffee',
+              x: randomTile.x,
+              y: randomTile.y,
+              location: 'house',
+              color: '#6F4E37'
+            }];
+          });
+        }, spawnDelay);
       }
     };
     (window as any).windowx = {
