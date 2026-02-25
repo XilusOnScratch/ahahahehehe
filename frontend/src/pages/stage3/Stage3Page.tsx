@@ -2132,7 +2132,7 @@ function Stage3Page() {
             } : { y: 0, rotate: 0 }}
             transition={isCoffeeHyper ? {
               y: { repeat: Infinity, duration: 0.5, ease: "linear" },
-              rotate: { repeat: Infinity, duration: 0.4, ease: "linear" }
+              rotate: { repeat: Infinity, duration: 1, ease: "linear" }
             } : { duration: 0.5 }}
           >
             <svg
