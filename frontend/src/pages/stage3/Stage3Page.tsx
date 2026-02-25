@@ -1430,17 +1430,22 @@ function Stage3Page() {
               <div
                 className="absolute"
                 style={{
-                  left: 19.5 * TILE_SIZE,
-                  top: 1.5 * TILE_SIZE,
-                  transform: 'translate(-50%, -50%)',
+                  left: 19 * TILE_SIZE,
+                  top: 1 * TILE_SIZE,
+                  width: TILE_SIZE,
+                  height: TILE_SIZE,
+                  overflow: 'hidden',
                   fontSize: '7px',
                   color: '#2e2e2c',
                   opacity: 0,
                   userSelect: 'none',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: 'normal',
                   lineHeight: 1.2,
                   textAlign: 'center',
                   zIndex: 9999,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 nothing here, maybe try the console
