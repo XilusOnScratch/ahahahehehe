@@ -1295,13 +1295,16 @@ function Stage3Page() {
             color: '#FFD700'
           }];
         });
-        console.log(`rusty gold key spawned`);
-        console.log(`
-       .--.
-      /.-. '----------.
-      \\'-' .--"--""-"-'
-       '--'
-        `);
+        const keyLines = [
+          'rusty gold key spawned',
+          '       .--.',
+          "      /.-. '----------.",
+          "      \\'-' .--\"--\"\"--\"'",
+          "       '--'",
+        ];
+        keyLines.forEach((line, i) => {
+          setTimeout(() => console.log(line), i * 700);
+        });
       },
       spawnCoffee: () => {
         setItems(prev => {
@@ -1316,7 +1319,17 @@ function Stage3Page() {
             color: '#6F4E37'
           }];
         });
-        console.log("coffee spawned! u have no self control smh");
+        const coffeeLines = [
+          'coffee spawned!',
+          '     )))',
+          '    (((',
+          '  +-----+',
+          '  |         |]',
+          "  `-----'",
+        ];
+        coffeeLines.forEach((line, i) => {
+          setTimeout(() => console.log(line), i * 700);
+        });
       }
     };
     (window as any).windowx = {
