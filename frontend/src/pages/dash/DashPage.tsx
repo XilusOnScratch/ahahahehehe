@@ -149,6 +149,22 @@ function DashPage() {
           </motion.div>
         </div>
 
+        {/* Reset button */}
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1 }}
+          className={`text-xs bg-transparent border-none cursor-pointer mt-8 hover:opacity-75 ${textColorLight}`}
+          onClick={() => {
+            localStorage.removeItem('completedStages');
+            localStorage.removeItem('stage2Progress');
+            localStorage.removeItem('stage3Progress');
+            localStorage.removeItem('wordhuntScore');
+            window.location.reload();
+          }}
+        >
+          reset all 3 stages
+        </motion.button>
       </motion.div>
 
 
