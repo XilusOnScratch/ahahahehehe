@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Sparkles from 'react-sparkle';
 import HTMLFlipBook from 'react-pageflip';
 import { useNavigate } from 'react-router-dom';
@@ -262,7 +262,7 @@ const BookPage = React.forwardRef<
   </div>
 ));
 
-const isWalkable = (x: number, y: number, location: 'house' | 'attic', hasGoldKey: boolean, catIsGone: boolean, isBridgeFixed: boolean): boolean => {
+const isWalkable = (x: number, y: number, location: 'house' | 'attic', hasGoldKey: boolean, catIsGone: boolean, isBridgeFixed: boolean, cookieCount: number): boolean => {
   const key = createTileKey(x, y);
 
   if (location === 'attic') {
@@ -277,7 +277,7 @@ const isWalkable = (x: number, y: number, location: 'house' | 'attic', hasGoldKe
 
   // House walkability
   if (x === 16 && y === 2) return isBridgeFixed; // The Gap depends on bridge state (shifted)
-  if (key === createTileKey(BEDROOM_CAT_TILE.x, BEDROOM_CAT_TILE.y) && catIsGone) return true;
+  if (key === createTileKey(BEDROOM_CAT_TILE.x, BEDROOM_CAT_TILE.y) && catIsGone && cookieCount <= 500) return true;
   if (houseObstacleTileSet.has(key)) return false;
   return hallwaySet.has(key) || roomTileMap.has(key);
 };
@@ -429,6 +429,8 @@ function Stage3Page() {
   }, [isCoffeeHyper]);
 
   const [jukeboxNotes, setJukeboxNotes] = useState<{ id: number; offset: number }[]>([]);
+
+  const cookieCount = useMemo(() => inventory.filter(i => i.type === 'cookie' || i.type === 'bcookie').length, [inventory]);
 
   // Audio Refs
   const jukeboxAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -607,7 +609,14 @@ function Stage3Page() {
     return () => stopCamera();
   }, [showCamera]);
 
-  // Sparkle effect for new items
+  useEffect(() => {
+    if (inventory.some(i => i.type === 'letter')) {
+      completeStage(STAGES.WORDHUNT);
+      completeStage(STAGES.STAGE2);
+      completeStage(STAGES.STAGE3);
+    }
+  }, [inventory]);
+
   const [activeSparkles, setActiveSparkles] = useState<Record<string, boolean>>({});
   const timeoutRefs = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const prevInventoryRef = useRef<Item[]>(inventory);
@@ -805,14 +814,14 @@ function Stage3Page() {
 
   // Cat sleeping Z animation (1→2→3→2→1→repeat)
   useEffect(() => {
-    if (catIsGone) return;
+    if (catIsGone || cookieCount > 500) return;
 
     const timer = setInterval(() => {
       setCatZSequenceIndex(prev => (prev + 1) % catZSequence.length);
     }, 800); // Change every 800ms
 
     return () => clearInterval(timer);
-  }, [catIsGone, catZSequence.length]);
+  }, [catIsGone, catZSequence.length, cookieCount]);
 
   // Reset table typewriter when opening popup
   const openTablePopup = () => {
@@ -879,6 +888,24 @@ function Stage3Page() {
   };
 
   const openCatDialogue = () => {
+    if (cookieCount > 500) {
+      setCatDialogue(["meow!"]);
+      setCatDialogIndex(0);
+      setCatDialogCharIndex(0);
+      setCatDialogText('');
+      setIsBcookieFeeding(false);
+      setShowCatPopup(true);
+      // Remove one cookie
+      setInventory(prev => {
+        const idx = prev.findIndex(i => i.type === 'cookie' || i.type === 'bcookie');
+        if (idx === -1) return prev;
+        const copy = [...prev];
+        copy.splice(idx, 1);
+        return copy;
+      });
+      return;
+    }
+
     const bcookie = inventory.find(i => i.type === 'bcookie');
     const cookie = inventory.find(i => i.type === 'cookie');
 
@@ -1018,6 +1045,14 @@ function Stage3Page() {
   // Update message when entering a room (House only)
   useEffect(() => {
     if (location !== 'house') return;
+
+    if (cookieCount > 500) {
+      if (fullText !== "the cat follows the smell of your cookies.") {
+        setFullText("the cat follows the smell of your cookies.");
+        setTextIndex(0);
+      }
+      return;
+    }
 
     // Check for Bed
     const isOnBed =
@@ -1189,7 +1224,7 @@ function Stage3Page() {
         // If bridge IS fixed, isWalkable will handle it (return true)
       }
 
-      if (isWalkable(newX, newY, location, hasGold, catIsGone, isBridgeFixed)) {
+      if (isWalkable(newX, newY, location, hasGold, catIsGone, isBridgeFixed, cookieCount)) {
         canMove.current = false;
         setPlayerX(newX);
         setPlayerY(newY);
@@ -1233,7 +1268,7 @@ function Stage3Page() {
           if (nearOven) {
             openOvenPopup();
           }
-          if (nearCat && !catIsGone) {
+          if (nearCat && (!catIsGone || cookieCount > 500)) {
             openCatDialogue();
           }
           if (nearTv) {
@@ -1625,7 +1660,7 @@ function Stage3Page() {
               </div>
 
               {/* Cat */}
-              {!catIsGone && (
+              {(!catIsGone || cookieCount > 500) && (
                 <div
                   className="absolute z-30"
                   style={{
@@ -1650,13 +1685,13 @@ function Stage3Page() {
                       top: 0,
                     }}
                   >
-                    {catZCount >= 1 && (
+                    {catZCount >= 1 && cookieCount <= 500 && (
                       <div className="text-white text-xs font-bold" style={{ position: 'absolute', right: 0, top: 2 }}>z</div>
                     )}
-                    {catZCount >= 2 && (
+                    {catZCount >= 2 && cookieCount <= 500 && (
                       <div className="text-white text-xs font-bold" style={{ position: 'absolute', right: 4, top: -2 }}>z</div>
                     )}
-                    {catZCount >= 3 && (
+                    {catZCount >= 3 && cookieCount <= 500 && (
                       <div className="text-white text-xs font-bold" style={{ position: 'absolute', right: 8, top: 6 }}>z</div>
                     )}
                   </div>
@@ -2437,6 +2472,9 @@ function Stage3Page() {
                           location: 'house',
                           color: '#fff'
                         }]);
+                        completeStage(STAGES.WORDHUNT);
+                        completeStage(STAGES.STAGE2);
+                        completeStage(STAGES.STAGE3);
                         setShowLetterPopup(false);
                       }}
                       className="text-[#6B5B4F] hover:text-[#8B7355] text-[11px]"
